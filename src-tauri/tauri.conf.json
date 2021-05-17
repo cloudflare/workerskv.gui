@@ -6,8 +6,8 @@
   "build": {
     "distDir": "../build",
     "devPath": "http://localhost:3000",
-    "beforeDevCommand": "",
-    "beforeBuildCommand": ""
+    "beforeDevCommand": "yarn svelte-kit dev",
+    "beforeBuildCommand": "yarn svelte-kit build"
   },
   "tauri": {
     "bundle": {
