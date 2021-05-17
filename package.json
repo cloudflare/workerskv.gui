@@ -1,11 +1,26 @@
 {
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
+    "dev": "run-p dev:*",
+    "dev:tauri": "tauri dev",
+    "dev:www": "svelte-kit dev",
+    "build": "run-s build:www build:tauri",
+    "build:tauri": "tauri build",
+    "build:www": "svelte-kit build",
+    "preview": "svelte-kit preview",
     "tauri": "tauri"
   },
   "devDependencies": {
+    "@sveltejs/adapter-static": "1.0.0-next.9",
+    "@sveltejs/kit": "next",
     "@tauri-apps/api": "1.0.0-beta.1",
-    "@tauri-apps/cli": "1.0.0-beta.2"
+    "@tauri-apps/cli": "1.0.0-beta.2",
+    "npm-run-all": "4.1.5",
+    "svelte": "3.38.2",
+    "svelte-preprocess": "4.7.3",
+    "tslib": "2.2.0",
+    "typescript": "4.2.4"
   }
 }
