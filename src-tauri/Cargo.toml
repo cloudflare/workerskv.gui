@@ -1,11 +1,11 @@
 [package]
-name = "app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+name = "kv_gui"
+version = "0.0.0"
+description = "Dashboard GUI client for Workers KV Namespaces"
+authors = ["Luke Edwards"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "kv_gui"
 edition = "2018"
 build = "src/build.rs"
 
@@ -18,6 +18,7 @@ tauri-build = { version = "1.0.0-beta.0" }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.0.0-beta.1", features = ["api-all"] }
+redis = { version = "0.20", features = ["tokio-native-tls-comp"] }
 
 [features]
 default = [ "custom-protocol" ]

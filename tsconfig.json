@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
+    "module": "es2020",
+		"target": "esnext",
+		"lib": ["es2020", "dom.iterable"],
 		"moduleResolution": "node",
-		"module": "es2020",
-		"lib": ["es2020"],
-		"target": "es2019",
 		"sourceMap": true,
 		"skipLibCheck": true,
 		"esModuleInterop": false,
@@ -11,9 +11,9 @@
 		"importsNotUsedAsValues": "error",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
-		"baseUrl": ".",
 		"allowJs": true,
 		"checkJs": true,
+		"baseUrl": ".",
 		"paths": {
 			"$lib/*": ["src/lib/*"]
 		}
