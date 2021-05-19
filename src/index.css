@@ -1,0 +1,32 @@
+:root {
+	--border: 1px solid #dee2e6;
+}
+
+* {
+	padding: 0;
+	margin: 0;
+}
+
+*, *:before, *:after {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 16px;
+}
+
+body {
+	/* overflow: hidden; */
+	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+	text-rendering: optimizeLegibility;
+	line-height: 1.5;
+}
+
+a {
+	color: inherit;
+}
+
+code {
+	font-family: menlo, inconsolata, monospace;
+	font-size: calc(1em - 3px);
+}
