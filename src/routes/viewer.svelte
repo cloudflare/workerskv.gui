@@ -1,21 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-
-	import * as KV from '$lib/utils/kvn';
 	import { dispatch } from '$lib/tauri';
-	import { timestamp } from '$lib/utils';
+
+	import * as utils from '$lib/utils';
+	import * as KV from '$lib/utils/kvn';
 	import { active } from '$lib/stores/connections';
 	import Layout from '$lib/tags/Layout.svelte';
 
-	let keys: string[] = [];
+	import type { Key } from '$lib/utils/kvn';
+
+	let lastsync = '';
+	let keylist: string[] = [];
+
 	let search: HTMLInputElement;
 
 	let pattern = '';
 	let sorting = 0; // freeform
 
 	$: isFiltering = pattern.length > 0;
-	$: nosorting = keys.length === 0 || isFiltering;
+	$: nosorting = keylist.length === 0 || isFiltering;
 
 	async function disconnect() {
 		await dispatch('redis_disconnect');
@@ -23,16 +27,20 @@
 	}
 
 	async function filter(pattern: string) {
-		keys = await dispatch<string[]>('redis_filter', { pattern });
+		keylist = await dispatch<string[]>('redis_filter', { pattern });
+	}
+
+	async function proceed(): Promise<boolean> {
+		// NOTE: tauri changes this to a Promise<boolean>
+		return window.confirm('Are you sure? Will incur charges');
 	}
 
 	async function synchronize() {
-		// NOTE: tauri changes this to a Promise<boolean>
-		if (await window.confirm('Are you sure? Will incur charges')) {
+		if (await proceed()) {
 			// TODO: pull from $active
 			let pager = KV.list(ACCT, NSID, TOKEN);
 
-			let seconds = timestamp();
+			let seconds = utils.timestamp();
 
 			for await (let payload of pager) {
 				let arr = await Promise.all(
@@ -46,12 +54,12 @@
 					})
 				);
 
-				keys = keys.concat(arr);
+				keylist = keylist.concat(arr);
 				if (payload.done) break;
 			}
 
 			await dispatch('redis_sync', {
-				timestamp: timestamp()
+				timestamp: utils.timestamp()
 			});
 		}
 	}
@@ -81,12 +89,13 @@
 			await onload();
 		} else {
 			let descending = sorting === 2;
-			keys = await dispatch<string[]>('redis_sort', { descending });
+			keylist = await dispatch<string[]>('redis_sort', { descending });
 		}
 	}
 
 	async function onload() {
-		keys = await dispatch<string[]>('redis_keylist');
+		keylist = await dispatch<string[]>('redis_keylist');
+		if (!lastsync) lastsync = await dispatch<string>('redis_lastsync');
 	}
 
 	onMount(onload);
@@ -107,9 +116,9 @@
 			<button on:click={synchronize}>SYNC</button>
 		</nav>
 
-		{#if keys.length > 0}
+		{#if keylist.length > 0}
 			<ul class="keylist">
-				{#each keys as keyname (keyname)}
+				{#each keylist as keyname (keyname)}
 				<li class:selected={keyname === viewing} on:click={onexpand}>{keyname}</li>
 				{/each}
 			</ul>
@@ -126,10 +135,20 @@
 		{/if}
 	</svelte:fragment>
 
-	<div slot="content">
-		<header>
-			<span>Connected to: <b>{ $active.nickname }</b></span>
-			<button on:click={disconnect}>Disconnect</button>
+	<div class="details" slot="content">
+		<header style="--c: {$active.color}">
+			<small>
+				Last Sync:
+				<time>{ lastsync ? utils.date(lastsync) : 'Never' }</time>
+			</small>
+			<span>
+				{#if $active.nickname}
+					<b>{ $active.nickname }</b>
+				{:else}
+					<b>{ $active.host }:{ $active.port }</b>
+				{/if}
+				<button on:click={disconnect}>Disconnect</button>
+			</span>
 		</header>
 
 		<pre>
@@ -196,11 +215,6 @@
 		padding: 0.25rem 0.5rem;
 	}
 
-	:global(.viewer section) header {
-		background: #dee2e6;
-		padding: 0.5rem;
-	}
-
 	.empty-keys {
 		display: flex;
 		flex-direction: column;
@@ -221,5 +235,36 @@
 	.empty-keys small {
 		margin: 0.25rem 0;
 		font-size: 0.6rem;
+	}
+
+	.details header {
+		background: #dee2e6;
+		font-size: 0.8rem;
+		padding: 0.5rem;
+	}
+
+	.details small {
+		font-size: 0.6rem;
+		font-style: italic;
+		font-weight: 600;
+	}
+
+	.details time {
+		font-weight: 400;
+	}
+
+	.details b {
+		margin-right: 0.5rem;
+	}
+
+	.details b::before {
+		content: '';
+		position: relative;
+		display: inline-block;
+		margin-right: 0.25rem;
+		background: var(--c, transparent);
+		border-radius: 50%;
+		height: 0.5rem;
+		width: 0.5rem;
 	}
 </style>

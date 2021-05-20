@@ -43,6 +43,15 @@ fn redis_keylist(state: State<Context>) -> Vec<String> {
 }
 
 #[command]
+fn redis_lastsync(state: State<Context>) -> String {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	let value = redis::lastsync(&mut client);
+	drop(client); drop(locker);
+	return value;
+}
+
+#[command]
 fn redis_sync(timestamp: String, state: State<Context>) {
 	println!("inside sync! {}", timestamp);
 	let mut locker = state.client.lock().expect("could not lock mutex");
@@ -95,9 +104,11 @@ fn main() {
 			redis_connect,
 			redis_disconnect,
 
+			redis_keylist,
+			redis_lastsync,
+
 			redis_set,
 			redis_sync,
-			redis_keylist,
 			redis_filter,
 			redis_sort,
 
