@@ -144,14 +144,29 @@
 		height: 3rem;
 	}
 
+	:global(.viewer aside) {
+		display: flex;
+		flex-direction: column;
+	}
+
 	:global(.viewer aside) header {
 		background: #f1f3f5;
 		padding: 0.75rem 1rem;
+		display: block;
 	}
 
 	:global(.viewer aside) input {
-		flex: 1;
 		font-size: 2rem;
+		width: 100%;
+	}
+
+	:global(.viewer aside ul) {
+		overflow-y: auto;
+		flex: 1;
+	}
+
+	:global(.viewer aside li) {
+		border-bottom: var(--border);
 	}
 
 	nav {
@@ -164,17 +179,12 @@
 		font-weight: bold;
 		color: #4a4a4a;
 		height: 1.5rem;
+		width: 100%;
 	}
 
 	:global(.viewer aside nav>span),
-	:global(.viewer aside li>span) {
-		border-right: 1px solid #c3c3c3;
+	:global(.viewer aside li) {
 		padding: 0.25rem 0.5rem;
-	}
-
-	:global(.viewer aside nav>span:last-of-type),
-	:global(.viewer aside li>span:last-of-type) {
-		border-right: none;
 	}
 
 	:global(.viewer section) header {
