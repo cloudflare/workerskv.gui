@@ -25,43 +25,66 @@ pub fn run<T: redis::FromRedisValue, A: redis::ToRedisArgs>(conn: &mut Connectio
 	redis::cmd(name).arg(args).query(conn)
 }
 
+/**
+ * Get all the KV KEYS on file
+ */
 pub fn keys(conn: &mut Connection) -> Vec<String> {
 	redis::cmd("SMEMBERS").arg(KEYLIST).query(conn).expect(
 		"unable to run 'SMEMBERS' for key list"
 	)
 }
 
-pub struct Key {
-	name: String,
-	lastseen: String, // Date.now()
-	expires: Option<String>, // Date.now()
-	metadata: Option<String>, // JSON string
+/**
+ * Get the LASTSYNC value
+ * AKA: A `sync` was completed
+ */
+pub fn lastsync(conn: &mut Connection) {
+	redis::cmd("GET").arg(LASTSYNC).query(conn).expect("unable to retrieve lastsync value")
 }
 
-pub fn set(conn: &mut Connection, key: Key) {
-	let keyname = key.name;
+/**
+ * Set the LASTSYNC value
+ * AKA: A `sync` was completed
+ */
+pub fn timestamp(conn: &mut Connection, timestamp: &str) {
+	redis::cmd("SET").arg(&[LASTSYNC, timestamp]).query(conn).expect("unable to update lastsync value")
+}
+
+pub struct Key {
+	name: String,
+	syncd: String, // Date.now()
+	expires: Option<String>, // Date.now()
+	metadata: Option<String>, // JSON string
+	lastupdate: Option<String>, // Date.now()
+}
+
+/**
+ * Save a new KV KEY to Redis
+ * Adds the KEY to the KEYLIST set
+ */
+pub fn set(conn: &mut Connection, name: String, syncd: String, expires: Option<String>, metadata: Option<String>) {
 	let mut args: Vec<&str> = Vec::new();
 
-	let _: () = redis::cmd("SADD").arg(&[KEYLIST, &keyname]).query(conn).expect(
-		&format!("unable to add '{}' to key list", &keyname)
+	let _: () = redis::cmd("SADD").arg(&[KEYLIST, &name]).query(conn).expect(
+		&format!("unable to add '{}' to key list", &name)
 	);
 
-	args.push(&keyname);
+	args.push(&name);
 
-	args.push("lastseen");
-	args.push(&key.lastseen);
+	args.push("syncd");
+	args.push(&syncd);
 
-	if let Some(expires) = &key.expires {
+	if let Some(seconds) = &expires {
 		args.push("expires");
-		args.push(expires);
+		args.push(seconds);
 	}
 
-	if let Some(metadata) = &key.metadata {
+	if let Some(json) = &metadata {
 		args.push("metadata");
-		args.push(metadata);
+		args.push(json);
 	}
 
 	redis::cmd("HSET").arg(args).query(conn).expect(
-		&format!("unable to run 'HSET {:?}' command", &keyname)
+		&format!("unable to run 'HSET {:?}' command", &name)
 	)
 }

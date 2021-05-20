@@ -14,7 +14,6 @@ struct Context {
   client: Arc<Mutex<Client>>,
 }
 
-
 // ---- Redis Commands ----
 
 /**
@@ -24,6 +23,7 @@ struct Context {
 fn redis_connect(host: String, port: u16, state: State<Context>) {
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	*locker = Some(redis::connect(host, port, false));
+	drop(locker);
 }
 
 #[command]
@@ -31,13 +31,33 @@ fn redis_disconnect(state: State<Context>) {
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	redis::disconnect();
 	*locker = None;
+	drop(locker);
 }
 
 #[command]
-fn redis_load(state: State<Context>) -> Vec<String> {
+fn redis_keylist(state: State<Context>) -> Vec<String> {
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	let mut client = locker.as_mut().expect("missing redis client");
-	redis::keys(&mut client)
+	let keys = redis::keys(&mut client);
+	drop(locker);
+	return keys;
+}
+
+#[command]
+fn redis_sync(timestamp: String, state: State<Context>) {
+	println!("inside sync! {}", timestamp);
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	redis::timestamp(&mut client, &timestamp);
+	drop(locker);
+}
+
+#[command]
+fn redis_set(name: String, syncd: String, expires: Option<String>, metadata: Option<String>, state: State<Context>) {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	redis::set(&mut client, name, syncd, expires, metadata);
+	drop(locker);
 }
 
 #[command]
@@ -62,7 +82,10 @@ fn main() {
 		.invoke_handler(tauri::generate_handler![
 			redis_connect,
 			redis_disconnect,
-			redis_load,
+
+			redis_keylist,
+			redis_sync,
+			redis_set,
 
 			// stateful_command,
 			window_label,

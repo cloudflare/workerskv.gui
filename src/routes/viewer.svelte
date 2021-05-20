@@ -2,13 +2,12 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	import { dispatch, sync } from '$lib/tauri';
+	import { dispatch } from '$lib/tauri';
+	import { list } from '$lib/utils/kvn';
 	import { active } from '$lib/stores/connections';
 	import Layout from '$lib/tags/Layout.svelte';
 
-	import type { Key } from '$lib/tauri';
-
-	let keys: Key[] = [];
+	let keys: string[] = [];
 	let search: HTMLInputElement;
 
 	async function disconnect() {
@@ -22,6 +21,40 @@
 		// keys = ...
 	}
 
+	async function synchronize() {
+		// NOTE: tauri changes this to a Promise<boolean>
+		if (await window.confirm('Are you sure? Will incur charges')) {
+			// TODO: pull from $active
+			let pager = list(
+				'df42c1de9846e351abbfdf885dde761b',
+				'802e0f5c830c45d09fcae3f506579341',
+				'token1234'
+			);
+
+			let seconds = String(Date.now() / 1e3 | 0);
+
+			for await (let payload of pager) {
+				let arr = await Promise.all(
+					payload.keys.map(info => {
+						return dispatch('redis_set', {
+							name: info.name,
+							syncd: seconds,
+							expires: info.expiration ? String(info.expiration) : null,
+							metadata: info.metadata ? JSON.stringify(info.metadata) : null,
+						}).then(() => info.name);
+					})
+				);
+
+				keys = keys.concat(arr);
+				if (payload.done) break;
+			}
+
+			await dispatch('redis_sync', {
+				timestamp: String(Date.now() / 1e3 | 0)
+			});
+		}
+	}
+
 	async function oninput(ev) {
 		console.log('inside', search.value);
 		if (search.value.length > 0) {
@@ -32,9 +65,7 @@
 	}
 
 	async function onload() {
-		console.log('INSIDE ONLOAD');
-		let output = await dispatch('redis_load');
-		console.log(output);
+		keys = await dispatch<string[]>('redis_keylist');
 	}
 
 	onMount(onload);
@@ -51,18 +82,15 @@
 			/>
 		</header>
 
-		<nav class="grid">
+		<nav>
 			<span>Key</span>
-			<span>Last Sync</span>
-			<!-- <th>Metadata</th> -->
+			<button on:click={synchronize}>SYNC</button>
 		</nav>
 
 		{#if keys.length > 0}
-			<ul class="grid">
-				{#each keys as key (key.name)}
-				<li>
-
-				</li>
+			<ul class="keylist">
+				{#each keys as keyname (keyname)}
+				<li>{keyname}</li>
 				{/each}
 			</ul>
 		{:else}
@@ -80,7 +108,6 @@
 			<button on:click={disconnect}>Disconnect</button>
 		</header>
 
-		<a href="/">Home</a>
 		<pre>
 			{ JSON.stringify($active, null, 2) }
 		</pre>
@@ -106,19 +133,16 @@
 		font-size: 2rem;
 	}
 
-	.grid {
+	nav {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(25%, 75%));
-	}
-
-	nav.grid {
-		height: 1.5rem;
-		font-weight: bold;
-		text-transform: uppercase;
 		align-items: center;
+		grid-template-columns: 1fr 80px;
 		font-size: 0.5rem;
+		text-transform: uppercase;
 		background: #ebebeb;
+		font-weight: bold;
 		color: #4a4a4a;
+		height: 1.5rem;
 	}
 
 	:global(.viewer aside nav>span),
