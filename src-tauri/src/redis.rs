@@ -1,5 +1,7 @@
 extern crate redis;
 
+use std::collections::HashMap;
+
 const KEYLIST: &str = "##__INTERNAL::keylist";
 const LASTSYNC: &str = "##__INTERNAL::lastsync";
 
@@ -108,4 +110,12 @@ pub fn sort(conn: &mut Connection, to_desc: bool) -> Vec<String>  {
 	redis::cmd("SORT").arg(&[KEYLIST, "ALPHA", dir]).query(conn).expect(
 		&format!("unable to run 'SORT ALPHA {}' operation", &dir)
 	)
+}
+
+pub fn details(conn: &mut Connection, key: String) -> HashMap<String, String>  {
+	let iter: redis::Iter<(String, String)> = redis::cmd("HSCAN").arg(&[&key, "0"]).clone().iter(conn).expect(
+		&format!("unable to run 'HSCAN {}' operation", key)
+	);
+
+	iter.collect()
 }

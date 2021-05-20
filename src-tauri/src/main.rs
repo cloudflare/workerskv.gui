@@ -4,7 +4,8 @@
 )]
 
 use std::sync::{Arc, Mutex};
-use tauri::{command, State, Window};
+use std::collections::HashMap;
+use tauri::{command, State};
 
 mod redis;
 
@@ -13,8 +14,6 @@ type Client = Option<redis::Connection>;
 struct Context {
   client: Arc<Mutex<Client>>,
 }
-
-// ---- Redis Commands ----
 
 /**
  * TODO: password, ssl, etc
@@ -39,7 +38,7 @@ fn redis_keylist(state: State<Context>) -> Vec<String> {
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	let mut client = locker.as_mut().expect("missing redis client");
 	let keys = redis::keys(&mut client);
-	drop(locker);
+	drop(client); drop(locker);
 	return keys;
 }
 
@@ -49,7 +48,7 @@ fn redis_sync(timestamp: String, state: State<Context>) {
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	let mut client = locker.as_mut().expect("missing redis client");
 	redis::timestamp(&mut client, &timestamp);
-	drop(locker);
+	drop(client); drop(locker);
 }
 
 #[command]
@@ -79,17 +78,12 @@ fn redis_sort(descending: bool, state: State<Context>) -> Vec<String> {
 }
 
 #[command]
-fn print_dirs() {
-	println!("config_dir: {:?}", tauri::api::path::config_dir());
-	println!("cache_dir: {:?}", tauri::api::path::cache_dir());
-	println!("data_dir: {:?}", tauri::api::path::data_dir());
-	println!("public_dir: {:?}", tauri::api::path::public_dir());
-}
-
-// ------------------------ Commands using Window ------------------------
-#[command]
-fn window_label(window: Window) {
-  println!("window label: {}", window.label());
+fn redis_details(key: String, state: State<Context>) -> HashMap<String, String> {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	let keys = redis::details(&mut client, key);
+	drop(client); drop(locker);
+	return keys;
 }
 
 fn main() {
@@ -107,9 +101,7 @@ fn main() {
 			redis_filter,
 			redis_sort,
 
-			// stateful_command,
-			window_label,
-			print_dirs,
+			redis_details,
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");

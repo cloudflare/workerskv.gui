@@ -66,6 +66,12 @@
 		}
 	}
 
+	async function onexpand(ev: Event) {
+		let key = (ev.target as HTMLElement).innerText;
+		details = await dispatch<Partial<Key>>('redis_details', { key });
+		details.name = viewing = key;
+	}
+
 	async function onsort() {
 		if (nosorting) {
 			return console.log('not allowed');
@@ -104,7 +110,7 @@
 		{#if keys.length > 0}
 			<ul class="keylist">
 				{#each keys as keyname (keyname)}
-				<li>{keyname}</li>
+				<li class:selected={keyname === viewing} on:click={onexpand}>{keyname}</li>
 				{/each}
 			</ul>
 		{:else}
@@ -128,6 +134,12 @@
 
 		<pre>
 			{ JSON.stringify($active, null, 2) }
+		</pre>
+
+		<hr>
+
+		<pre>
+			{ JSON.stringify(details, null, 2) }
 		</pre>
 	</div>
 </Layout>
