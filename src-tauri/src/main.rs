@@ -3,20 +3,17 @@
 	windows_subsystem = "windows"
 )]
 
-// extern crate redis;
+use std::sync::{Arc, Mutex};
 use tauri::{command, State, Window};
+
 mod redis;
 
-#[derive(Debug)]
+type Client = Option<redis::Connection>;
+
 struct Context {
-  value: u64,
-	label: String,
+  client: Arc<Mutex<Client>>,
 }
 
-#[command]
-fn stateful_command(argument: Option<String>, state: State<Context>) {
-  println!("{:?} {:?}", argument, state.inner());
-}
 
 // ---- Redis Commands ----
 
@@ -24,11 +21,31 @@ fn stateful_command(argument: Option<String>, state: State<Context>) {
  * TODO: password, ssl, etc
  */
 #[command]
-fn redis_connect(host: String, port: u16) {
-	let mut conn = redis::connect(host, port, false);
-	println!("i am here");
-	let _: () = redis::run(&mut conn, "SET", &["foo", "bar"]).expect("failed to execute SET for 'foo'");
-	println!("i ran SET");
+fn redis_connect(host: String, port: u16, state: State<Context>) {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	*locker = Some(redis::connect(host, port, false));
+}
+
+#[command]
+fn redis_disconnect(state: State<Context>) {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	redis::disconnect();
+	*locker = None;
+}
+
+#[command]
+fn redis_load(state: State<Context>) -> Vec<String> {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	redis::keys(&mut client)
+}
+
+#[command]
+fn print_dirs() {
+	println!("config_dir: {:?}", tauri::api::path::config_dir());
+	println!("cache_dir: {:?}", tauri::api::path::cache_dir());
+	println!("data_dir: {:?}", tauri::api::path::data_dir());
+	println!("public_dir: {:?}", tauri::api::path::public_dir());
 }
 
 // ------------------------ Commands using Window ------------------------
@@ -40,13 +57,16 @@ fn window_label(window: Window) {
 fn main() {
 	tauri::Builder::default()
 		.manage(Context {
-			value: 0,
-			label: "Hello".into(),
+			client: Arc::new(Mutex::new(None)),
 		})
 		.invoke_handler(tauri::generate_handler![
 			redis_connect,
-			stateful_command,
+			redis_disconnect,
+			redis_load,
+
+			// stateful_command,
 			window_label,
+			print_dirs,
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
