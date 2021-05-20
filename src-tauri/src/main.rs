@@ -57,7 +57,7 @@ fn redis_set(name: String, syncd: String, expires: Option<String>, metadata: Opt
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	let mut client = locker.as_mut().expect("missing redis client");
 	redis::set(&mut client, name, syncd, expires, metadata);
-	drop(locker);
+	drop(client); drop(locker);
 }
 
 #[command]
@@ -65,7 +65,16 @@ fn redis_filter(pattern: String, state: State<Context>) -> Vec<String> {
 	let mut locker = state.client.lock().expect("could not lock mutex");
 	let mut client = locker.as_mut().expect("missing redis client");
 	let keys = redis::filter(&mut client, pattern);
-	drop(locker);
+	drop(client); drop(locker);
+	return keys;
+}
+
+#[command]
+fn redis_sort(descending: bool, state: State<Context>) -> Vec<String> {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	let keys = redis::sort(&mut client, descending);
+	drop(client); drop(locker);
 	return keys;
 }
 
@@ -92,10 +101,11 @@ fn main() {
 			redis_connect,
 			redis_disconnect,
 
+			redis_set,
+			redis_sync,
 			redis_keylist,
 			redis_filter,
-			redis_sync,
-			redis_set,
+			redis_sort,
 
 			// stateful_command,
 			window_label,

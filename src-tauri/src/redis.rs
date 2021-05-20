@@ -102,3 +102,10 @@ pub fn filter(conn: &mut Connection, pattern: String) -> Vec<String>  {
 
 	return keys;
 }
+
+pub fn sort(conn: &mut Connection, to_desc: bool) -> Vec<String>  {
+	let dir = if to_desc { "DESC" } else { "ASC" };
+	redis::cmd("SORT").arg(&[KEYLIST, "ALPHA", dir]).query(conn).expect(
+		&format!("unable to run 'SORT ALPHA {}' operation", &dir)
+	)
+}

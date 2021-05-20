@@ -10,6 +10,9 @@
 	let keys: string[] = [];
 	let search: HTMLInputElement;
 
+	let sorting = 0; // freeform
+	$: nosorting = keys.length === 0 || search.value.length > 0;
+
 	async function disconnect() {
 		await dispatch('redis_disconnect');
 		goto('/');
@@ -53,12 +56,25 @@
 		}
 	}
 
-	async function oninput(ev) {
-		console.log('inside', search.value);
+	// TODO: debounce
+	async function oninput() {
 		if (search.value.length > 0) {
 			await filter(search.value);
 		} else {
 			await onload();
+		}
+	}
+
+	async function onsort() {
+		if (nosorting) {
+			return console.log('not allowed');
+		}
+		if (++sorting > 2) {
+			sorting = 0; // reset -> nosort
+			await onload();
+		} else {
+			let descending = sorting === 2;
+			keys = await dispatch<string[]>('redis_sort', { descending });
 		}
 	}
 
@@ -73,15 +89,14 @@
 	<svelte:fragment slot="aside">
 		<header>
 			<input
-				type="search"
-				bind:this={search}
-				placeholder="Search keys"
-				on:input={oninput}
+				bind:this={search} on:input={oninput}
+				type="search" placeholder="Search keys"
+				autocapitalize="off" autocomplete="off"
 			/>
 		</header>
 
 		<nav>
-			<span>Key</span>
+			<span disabled={nosorting} on:click={onsort}>Key</span>
 			<button on:click={synchronize}>SYNC</button>
 		</nav>
 
