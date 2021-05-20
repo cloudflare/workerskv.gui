@@ -10,8 +10,11 @@
 	let keys: string[] = [];
 	let search: HTMLInputElement;
 
+	let pattern = '';
 	let sorting = 0; // freeform
-	$: nosorting = keys.length === 0 || search.value.length > 0;
+
+	$: isFiltering = pattern.length > 0;
+	$: nosorting = keys.length === 0 || isFiltering;
 
 	async function disconnect() {
 		await dispatch('redis_disconnect');
@@ -58,8 +61,9 @@
 
 	// TODO: debounce
 	async function oninput() {
-		if (search.value.length > 0) {
-			await filter(search.value);
+		pattern = search.value;
+		if (pattern.length > 0) {
+			await filter(pattern);
 		} else {
 			await onload();
 		}
@@ -108,9 +112,13 @@
 			</ul>
 		{:else}
 			<div class="empty-keys">
-				<span>You have not run <pre>SYNC</pre> yet</span>
-				<small>OR</small>
-				<span>Namespace is empty</span>
+				{#if isFiltering}
+					<span>No keys matched your search filter</span>
+				{:else}
+					<span>You have not run <pre>SYNC</pre> yet</span>
+					<small>OR</small>
+					<span>Namespace is empty</span>
+				{/if}
 			</div>
 		{/if}
 	</svelte:fragment>
