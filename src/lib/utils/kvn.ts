@@ -8,6 +8,8 @@ export interface Key {
 	expires?: string;
 	metadata?: string;
 	lastupdate?: string;
+	mimetype?: string;
+	value?: string;
 }
 
 // come via REST API
@@ -65,3 +67,17 @@ export async function * list(
 		}
 	}
 }
+
+export async function retrieve(
+	accountid: string,
+	namespaceid: string,
+	token: string,
+	key: string,
+): Promise<string> {
+	let keyname = encodeURIComponent(key);
+	let headers = { Authorization: `Bearer ${token}` };
+	// @see https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys
+	let endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountid}/storage/kv/namespaces/${namespaceid}/values/${keyname}`;
+	return send<string>(endpoint, { headers, responseType: 3 }).then(r => r.data); // "number[]"
+}
+

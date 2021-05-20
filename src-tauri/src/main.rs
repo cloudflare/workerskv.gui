@@ -95,6 +95,14 @@ fn redis_details(key: String, state: State<Context>) -> HashMap<String, String> 
 	return keys;
 }
 
+#[command]
+fn redis_value(key: String, value: String, timestamp: String, mimetype: Option<String>, state: State<Context>) {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	redis::value(&mut client, key, value, timestamp, mimetype);
+	drop(client); drop(locker);
+}
+
 fn main() {
 	tauri::Builder::default()
 		.manage(Context {
@@ -113,6 +121,7 @@ fn main() {
 			redis_sort,
 
 			redis_details,
+			redis_value,
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");

@@ -14,9 +14,13 @@
 	let keylist: string[] = [];
 
 	let search: HTMLInputElement;
+	let details: Partial<Key> = {};
 
 	let pattern = '';
 	let sorting = 0; // freeform
+	let viewing = ''; // keyname -> details
+
+	let ack_value = false; // proceed() for charge
 
 	$: isFiltering = pattern.length > 0;
 	$: nosorting = keylist.length === 0 || isFiltering;
@@ -62,6 +66,32 @@
 				timestamp: utils.timestamp()
 			});
 		}
+	}
+
+	/**
+	 * get the value for a single key
+	 */
+	async function retrieve() {
+		// Will cost $$ to read a KV value
+		if (!ack_value && !await proceed()) return
+		ack_value = true; // dont ask anymore
+
+		let name = details.name;
+		let seconds = utils.timestamp();
+		let value = await KV.retrieve(ACCT, NSID, TOKEN, name);
+		console.log({ value, seconds });
+
+		await dispatch('redis_value', {
+			key: name,
+			value: value,
+			timestamp: seconds,
+			mimetype: null, // TODO
+		});
+		// client-side updates
+		details.lastupdate = seconds;
+		details.mimetype = null;
+		details.value = value;
+		details = details;
 	}
 
 	// TODO: debounce
@@ -160,6 +190,10 @@
 		<pre>
 			{ JSON.stringify(details, null, 2) }
 		</pre>
+
+		<button on:click={retrieve}>Retrieve Value</button>
+		<!-- {#if details.value == null}
+		{/if} -->
 	</div>
 </Layout>
 

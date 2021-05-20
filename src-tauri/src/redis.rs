@@ -57,7 +57,9 @@ pub struct Key {
 	syncd: String, // Date.now()
 	expires: Option<String>, // Date.now()
 	metadata: Option<String>, // JSON string
-	lastupdate: Option<String>, // Date.now()
+	lastupdate: Option<String>, // value touched
+	mimetype: Option<String>, // how to render
+	value: Option<String>, // <any>
 }
 
 /**
@@ -118,4 +120,25 @@ pub fn details(conn: &mut Connection, key: String) -> HashMap<String, String>  {
 	);
 
 	iter.collect()
+}
+
+pub fn value(conn: &mut Connection, key: String, value: String, timestamp: String, mimetype: Option<String>) {
+	let mut args: Vec<&str> = Vec::new();
+
+	args.push(&key);
+
+	args.push("value");
+	args.push(&value);
+
+	args.push("lastupdate");
+	args.push(&timestamp);
+
+	if let Some(known) = &mimetype {
+		args.push("mimetype");
+		args.push(known);
+	}
+
+	redis::cmd("HSET").arg(args).query(conn).expect(
+		&format!("unable to run 'HSET {:?}' command", &key)
+	)
 }
