@@ -88,3 +88,17 @@ pub fn set(conn: &mut Connection, name: String, syncd: String, expires: Option<S
 		&format!("unable to run 'HSET {:?}' command", &name)
 	)
 }
+
+pub fn filter(conn: &mut Connection, pattern: String) -> Vec<String>  {
+	let mut keys: Vec<String> = Vec::new();
+
+	let iter: redis::Iter<String> = redis::cmd("SSCAN").arg(&[KEYLIST, "0", "MATCH", &pattern]).clone().iter(conn).expect(
+		&format!("unable to run 'SSCAN MATCH {}' operation", &pattern)
+	);
+
+	for key in iter {
+		keys.push(key);
+	}
+
+	return keys;
+}

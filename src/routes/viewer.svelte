@@ -16,9 +16,7 @@
 	}
 
 	async function filter(pattern: string) {
-		let output = await dispatch('redis_filter', { pattern });
-		console.log('> output', output);
-		// keys = ...
+		keys = await dispatch<string[]>('redis_filter', { pattern });
 	}
 
 	async function synchronize() {

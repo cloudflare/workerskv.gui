@@ -61,6 +61,15 @@ fn redis_set(name: String, syncd: String, expires: Option<String>, metadata: Opt
 }
 
 #[command]
+fn redis_filter(pattern: String, state: State<Context>) -> Vec<String> {
+	let mut locker = state.client.lock().expect("could not lock mutex");
+	let mut client = locker.as_mut().expect("missing redis client");
+	let keys = redis::filter(&mut client, pattern);
+	drop(locker);
+	return keys;
+}
+
+#[command]
 fn print_dirs() {
 	println!("config_dir: {:?}", tauri::api::path::config_dir());
 	println!("cache_dir: {:?}", tauri::api::path::cache_dir());
@@ -84,6 +93,7 @@ fn main() {
 			redis_disconnect,
 
 			redis_keylist,
+			redis_filter,
 			redis_sync,
 			redis_set,
 
