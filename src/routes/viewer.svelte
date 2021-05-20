@@ -2,8 +2,9 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
+	import * as KV from '$lib/utils/kvn';
 	import { dispatch } from '$lib/tauri';
-	import { list } from '$lib/utils/kvn';
+	import { timestamp } from '$lib/utils';
 	import { active } from '$lib/stores/connections';
 	import Layout from '$lib/tags/Layout.svelte';
 
@@ -29,13 +30,9 @@
 		// NOTE: tauri changes this to a Promise<boolean>
 		if (await window.confirm('Are you sure? Will incur charges')) {
 			// TODO: pull from $active
-			let pager = list(
-				'df42c1de9846e351abbfdf885dde761b',
-				'802e0f5c830c45d09fcae3f506579341',
-				'token1234'
-			);
+			let pager = KV.list(ACCT, NSID, TOKEN);
 
-			let seconds = String(Date.now() / 1e3 | 0);
+			let seconds = timestamp();
 
 			for await (let payload of pager) {
 				let arr = await Promise.all(
@@ -54,7 +51,7 @@
 			}
 
 			await dispatch('redis_sync', {
-				timestamp: String(Date.now() / 1e3 | 0)
+				timestamp: timestamp()
 			});
 		}
 	}

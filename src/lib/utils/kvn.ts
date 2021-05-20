@@ -1,18 +1,6 @@
 import { getClient } from '@tauri-apps/api/http';
 import type { HttpOptions } from '@tauri-apps/api/http';
 
-async function send<T>(url: string, options: Partial<HttpOptions> = {}) {
-	const client = await getClient();
-	const method = options.method || 'GET';
-
-	options.headers = {
-		...options.headers,
-		Origin: 'https://github.com'
-	};
-
-	return client.request<T>({ ...options, url, method });
-}
-
 // sent to Redis
 export interface Key {
 	name: string;
@@ -29,7 +17,7 @@ export interface KeyInfo {
 	metadata?: Dict<any>;
 }
 
-interface Result {
+interface KeyList {
 	success: boolean;
 	messages: string[];
 	errors: string[];
@@ -38,6 +26,18 @@ interface Result {
 		count: number;
 		cursor: string;
 	}
+}
+
+async function send<T>(url: string, options: Partial<HttpOptions> = {}) {
+	const client = await getClient();
+	const method = options.method || 'GET';
+
+	options.headers = {
+		...options.headers,
+		Origin: 'https://github.com'
+	};
+
+	return client.request<T>({ ...options, url, method });
 }
 
 export async function * list(
@@ -51,7 +51,7 @@ export async function * list(
 
 	while (true) {
 		if (cursor) endpoint.searchParams.set('cursor', cursor);
-		let { data } = await send<Result>(endpoint.href, { headers });
+		let { data } = await send<KeyList>(endpoint.href, { headers });
 
 		if (data.success) {
 			cursor = data.result_info.cursor;
