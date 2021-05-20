@@ -24,6 +24,7 @@
 	}
 
 	aside {
+		min-width: 220px;
 		width: clamp(220px, 30%, 360px);
 		border-right: var(--border);
 		background-color: #f8f9fa;
@@ -31,6 +32,7 @@
 
 	aside.wider {
 		width: clamp(300px, 40%, 480px);
+		min-width: 300px;
 	}
 
 	aside > :global(*),
@@ -40,6 +42,7 @@
 
 	section {
 		flex: 1;
+		overflow: hidden;
 		background-color: #f1f3f5;
 	}
 </style>
