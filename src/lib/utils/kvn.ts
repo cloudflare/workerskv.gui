@@ -57,7 +57,7 @@ export async function * list(
 			cursor = data.result_info.cursor;
 
 			yield {
-				done: !!cursor,
+				done: cursor.length === 0,
 				keys: data.result,
 			};
 		} else {
