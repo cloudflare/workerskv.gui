@@ -9,6 +9,7 @@
 	import { goto } from '$app/navigation';
 
 	import Layout from '$lib/tags/Layout.svelte';
+	import Colors from '$lib/tags/Colors.svelte';
 	import Input from '$lib/tags/Input.svelte';
 	import { dispatch } from '$lib/tauri';
 
@@ -38,10 +39,6 @@
 		'redis.port': val => {
 			if (val == null) return 'Required';
 			return (+val > 1000) || 'Must be at least 1000';
-		},
-		'redis.username': val => {
-			if (val == null) return true; // optional
-			return val.length > 2 || 'Must be at least 2 characters';
 		},
 		'redis.username': val => {
 			if (val == null) return true; // optional
@@ -140,9 +137,10 @@
 			label="Nickname" bind:value={values.nickname}
 		/>
 
-		<Input
-			id="c-color" name="color" type="color"
-			label="Color" bind:value={values.color}
+		<label for="c-color">Color</label>
+		<Colors
+			id="c-color" name="color"
+			bind:value={values.color}
 		/>
 
 		<fieldset>
