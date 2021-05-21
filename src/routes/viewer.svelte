@@ -74,9 +74,10 @@
 
 		// client update
 		keylist = keybatch;
+		lastsync = utils.timestamp();
 
 		await dispatch('redis_sync', {
-			timestamp: utils.timestamp()
+			timestamp: lastsync
 		});
 	}
 
