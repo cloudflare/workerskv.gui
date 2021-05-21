@@ -30,7 +30,7 @@
 		'nickname': val => {
 			if (val == null) return 'Required';
 			if (val.length < 2) return 'Must be at least 2 characters';
-			return val.length < 17 || 'Must be no more than 16 characters';
+			return val.length < 24 || 'Must be no more than 24 characters';
 		},
 		'color': val => {
 			if (val == null) return 'Required';
