@@ -309,6 +309,7 @@
 		align-items: center;
 		cursor: pointer;
 		height: 100%;
+		width: 100%;
 	}
 
 	.keynav svg {
@@ -460,6 +461,10 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: 0.25rem;
+	}
+
+	.keyvalue .label {
+		width: 100%;
 	}
 
 	.keyvalue small {
