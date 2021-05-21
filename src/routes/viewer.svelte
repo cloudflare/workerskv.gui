@@ -6,7 +6,10 @@
 	import * as utils from '$lib/utils';
 	import * as KV from '$lib/utils/kvn';
 	import { active } from '$lib/stores/connections';
+
 	import Layout from '$lib/tags/Layout.svelte';
+	import Value from '$lib/tags/Value.svelte';
+	import Date from '$lib/tags/Date.svelte';
 
 	import type { Key } from '$lib/utils/kvn';
 
@@ -168,9 +171,9 @@
 	<div class="details" slot="content">
 		<header style="--c: {$active.color}">
 			<small>
-				Last Sync:
-				<time>{ lastsync ? utils.date(lastsync) : 'Never' }</time>
+				Last Sync: <Date value={lastsync} />
 			</small>
+
 			<span>
 				{#if $active.nickname}
 					<b>{ $active.nickname }</b>
@@ -181,11 +184,50 @@
 			</span>
 		</header>
 
-		<pre>
-			{ JSON.stringify($active, null, 2) }
-		</pre>
+		<div class="fields" class:disabled={!details.name}>
+			<div class="cell">
+				<span class="label">Name</span>
+				<span class="value">
+					<pre><code>{details.name}</code></pre>
+				</span>
+			</div>
 
-		<hr>
+			<div class="cell w50">
+				<span class="label">Last Seen</span>
+				<span class="value">
+					<Value value={details.syncd ? utils.date(details.syncd) : undefined} />
+				</span>
+			</div>
+
+			<div class="cell w50">
+				<span class="label">Expiration</span>
+				<span class="value">
+					<Value value={details.expires} />
+				</span>
+			</div>
+
+			<div class="cell">
+				<span class="label">Metadata</span>
+				<span class="value key-metadata">
+					<Value value={details.metadata} />
+				</span>
+			</div>
+
+			<div class="cell keyvalue">
+				<div>
+					<span class="label">
+						Value
+						{#if details.lastupdate}
+							<small><Date value={details.lastupdate}/></small>
+						{/if}
+					</span>
+					<button>Refresh</button>
+				</div>
+				<span class="value key-value">
+					<Value value={details.value} />
+				</span>
+			</div>
+		</div>
 
 		<pre>
 			{ JSON.stringify(details, null, 2) }
@@ -272,7 +314,7 @@
 	}
 
 	.details header {
-		background: #dee2e6;
+		background: #e9ecef;
 		font-size: 0.8rem;
 		padding: 0.5rem;
 	}
@@ -281,10 +323,6 @@
 		font-size: 0.6rem;
 		font-style: italic;
 		font-weight: 600;
-	}
-
-	.details time {
-		font-weight: 400;
 	}
 
 	.details b {
@@ -300,5 +338,50 @@
 		border-radius: 50%;
 		height: 0.5rem;
 		width: 0.5rem;
+	}
+
+	.fields {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-auto-rows: min-content;
+		height: calc(100vh - 3rem);
+		overflow-y: auto;
+	}
+
+	.cell {
+		padding: 0.5rem;
+		grid-column: span 2;
+	}
+
+	.cell.w50 {
+		grid-column: span 1;
+	}
+
+	.cell .label {
+		font-size: 8px;
+		text-transform: uppercase;
+		font-weight: bold;
+	}
+
+	.cell .value {
+		display: block;
+		font-size: 0.85rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		background: #dee2e6;
+		overflow-x: auto;
+	}
+
+	.key-metadata :global(pre:not(.empty)) {
+		min-height: 4rem;
+	}
+
+	.key-value :global(pre) {
+		min-height: 6rem;
+	}
+
+	.keyvalue > div {
+		display: flex;
+		justify-content: space-between;
 	}
 </style>
