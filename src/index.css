@@ -90,3 +90,28 @@ header {
 .navitem.active {
 	--bgc: #ffc078;
 }
+
+button {
+	cursor: pointer;
+	padding: 0.5rem 0.85rem;
+	border-radius: var(--radius);
+	color: var(--c);
+	background: var(--bgc, lightgrey);
+	box-shadow: 0 1px 1px var(--box, transparent);
+}
+
+button.sm {
+	padding: 0.25rem 0.5rem;
+}
+
+button.white {
+	--c: #343a40;
+	--bgc: #fff;
+	--box: #ced4da;
+}
+
+button.primary {
+	--c: #fff;
+	--bgc: #4263eb;
+	--box: #3b5bdb;
+}

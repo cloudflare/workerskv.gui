@@ -235,12 +235,12 @@
 
 		<footer>
 			{#if isEditing}
-				<button on:click|preventDefault={toUpdate}>Save Changes</button>
+				<button type="button" class="white" on:click={toUpdate}>Save Changes</button>
 			{:else}
-				<button on:click|preventDefault={toFavorite}>Add to Favorites</button>
+				<button type="button" class="white" on:click={toFavorite}>Add to Favorites</button>
 			{/if}
 
-			<button type="submit">Connect</button>
+			<button type="submit" class="primary">Connect</button>
 		</footer>
 	</form>
 </Layout>
@@ -350,5 +350,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		margin-top: 0.5rem;
 	}
 </style>

@@ -154,7 +154,7 @@
 				<svg class="i-asc" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zm0 4a1 1 0 000 2h5a1 1 0 000-2H3zm0 4a1 1 0 100 2h4a1 1 0 100-2H3zm10 5a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/></svg>
 				<svg class="i-desc" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zm0 4a1 1 0 000 2h7a1 1 0 100-2H3zm0 4a1 1 0 100 2h4a1 1 0 100-2H3zm12-3a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z"/></svg>
 			</span>
-			<button on:click={synchronize}>SYNC</button>
+			<button class="primary sm" on:click={synchronize}>SYNC</button>
 		</nav>
 
 		{#if keylist.length > 0}
@@ -183,7 +183,7 @@
 				Last Sync: <Date value={lastsync} />
 			</small>
 
-			<span>
+			<span class="connection">
 				{#if $active.nickname}
 					<Nickname
 						label={ $active.nickname }
@@ -194,7 +194,7 @@
 						label="{ $active.host }:{ $active.port }"
 					/>
 				{/if}
-				<button on:click={disconnect}>Disconnect</button>
+				<button class="sm" on:click={disconnect}>Disconnect</button>
 			</span>
 		</header>
 
@@ -231,16 +231,23 @@
 				<div>
 					<span class="label">
 						Value
-						{#if details.lastupdate}
-							<small><Date value={details.lastupdate}/></small>
-						{/if}
+						<small>
+							Last Update:
+							<Date value={details.lastupdate}/>
+						</small>
 					</span>
-					<button on:click={retrieve}>Refresh</button>
+					<button class="sm" on:click={retrieve}>Refresh</button>
 				</div>
 				<span class="value key-value">
 					<Value value={details.value} />
 				</span>
 			</div>
+
+			{#if !details.name}
+				<div class="fields-empty">
+					<p>Please select a KEY from the sidebar</p>
+				</div>
+			{/if}
 		</div>
 	</div>
 </Layout>
@@ -277,15 +284,15 @@
 	}
 
 	.keynav {
-		display: grid;
+		display: flex;
 		align-items: center;
-		grid-template-columns: 1fr 80px;
+		justify-content: space-between;
 		font-size: 0.5rem;
 		text-transform: uppercase;
 		background: #ebebeb;
 		font-weight: bold;
 		color: #4a4a4a;
-		height: 1.5rem;
+		height: 1.75rem;
 		width: 100%;
 	}
 
@@ -296,6 +303,7 @@
 		display: inline-flex;
 		align-items: center;
 		cursor: pointer;
+		height: 100%;
 	}
 
 	.keynav svg {
@@ -313,6 +321,16 @@
 
 	.keynav.ascending .i-asc {
 		visibility: visible;
+	}
+
+	/* SYNC button */
+	.keynav button {
+		margin: 0 0.5rem;
+		font-size: 0.55rem;
+		padding-right: 1rem;
+		padding-left: 1rem;
+		font-weight: bold;
+		height: 1.25rem;
 	}
 
 	.empty-keys {
@@ -346,11 +364,23 @@
 	.details small {
 		font-size: 0.6rem;
 		font-style: italic;
+		text-transform: none;
 		font-weight: 600;
 	}
 
-	.details button {
+	.connection {
+		display: flex;
+		align-items: center;
+	}
+
+	/* DISCONNECT BTN */
+	.connection button {
+		--c: #fff;
+		--bgc: #f03e3e;
+		--box: #f03e3e;
+		font-size: 0.55rem;
 		margin-left: 0.5rem;
+		font-weight: 500;
 	}
 
 	.fields {
@@ -358,7 +388,33 @@
 		grid-template-columns: 1fr 1fr;
 		grid-auto-rows: min-content;
 		height: calc(100vh - 3rem);
+		position: relative;
 		overflow-y: auto;
+	}
+
+	.fields.disabled {
+		cursor: not-allowed;
+	}
+
+	.fields.disabled,
+	.fields-empty {
+		pointer-events: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+
+	.fields-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(52, 58, 64, 0.7);
+		position: absolute;
+		color: #f1f3f5;
+		font-weight: 300;
+		bottom: 0;
+		right: 0;
+		left: 0;
+		top: 0;
 	}
 
 	.cell {
@@ -371,7 +427,8 @@
 	}
 
 	.cell .label {
-		font-size: 8px;
+		font-size: 10px;
+		letter-spacing: 0.2px;
 		text-transform: uppercase;
 		font-weight: bold;
 	}
@@ -395,6 +452,26 @@
 
 	.keyvalue > div {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
+		margin-bottom: 0.25rem;
+	}
+
+	.keyvalue small {
+		display: block;
+		font-size: 0.5rem;
+	}
+
+	/* REFRESH BTN */
+	.keyvalue button {
+		--c: #fff;
+		/* --bgc: #f76707;
+		--box: #d9480f; */
+		--bgc: #15aabf;
+		--box: #1098ad;
+		font-size: 0.5rem;
+		text-transform: uppercase;
+		font-weight: 600;
+		height: 1.25rem;
 	}
 </style>
