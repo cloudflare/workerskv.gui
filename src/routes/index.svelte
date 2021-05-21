@@ -9,6 +9,7 @@
 	import { goto } from '$app/navigation';
 	import * as Connections from '$lib/stores/connections';
 
+	import Nickname from '$lib/tags/Nickname.svelte';
 	import Layout from '$lib/tags/Layout.svelte';
 	import Colors from '$lib/tags/Colors.svelte';
 
@@ -16,7 +17,7 @@
 	import type { Connection } from '$lib/stores/connections';
 
 	// initial value
-	let favorites = [];
+	let favorites: Connection[] = [];
 
 	let selected = -1;
 	let form: HTMLFormElement;
@@ -98,8 +99,8 @@
 		if (!isValid()) return;
 
 		// editing favorite VS is new fav
-		if (isEditing) favorites[selected] = values;
-		else favorites.push(values);
+		if (isEditing) favorites[selected] = values as Connection;
+		else favorites.push(values as Connection);
 
 		favorites = favorites;
 		Connections.update(favorites);
@@ -119,12 +120,20 @@
 		</header>
 
 		{#if favorites.length > 0}
-			<h2>FAVORITES</h2>
+			<h4>Favorites</h4>
 
 			<ul>
 				{#each favorites as fav,idx (idx)}
-					<li on:click={() => select(idx)}>
-						{ fav.nickname } ({fav.color})
+					<li
+						class="navitem"
+						class:active={selected === idx}
+						on:click={() => select(idx)}
+					>
+						<Nickname
+							class="fav"
+							label={ fav.nickname }
+							color={ fav.color }
+						/>
 					</li>
 				{/each}
 			</ul>
@@ -272,16 +281,12 @@
 		border-color: #fa5252;
 	}
 
-	:global(.connect aside) {
-		display: flex;
-	}
-
 	header {
 		--c: #ffd43b;
 		padding: 1rem;
 		align-items: center;
 		justify-content: flex-end;
-		background: var(--bg, transparent);
+		background: var(--bgc, transparent);
 		transition: background 200ms linear;
 		font-size: 0.85rem;
 		font-weight: 600;
@@ -297,12 +302,36 @@
 	}
 
 	header:hover {
-		--bg: #e9ecef;
+		--bgc: #e9ecef;
 		--c: #ffa94d;
 	}
 
 	header.active {
-		--bg: #e9ecef;
+		--bgc: #e9ecef;
 		--c: #fd7e14;
+	}
+
+	h4 {
+		margin-top: 2rem;
+		margin-bottom: 0.25rem;
+		padding-left: 1rem;
+		font-weight: 300;
+	}
+
+	.navitem {
+		list-style: none;
+		padding-left: 2rem;
+		padding-bottom: 0.5rem;
+		padding-top: 0.5rem;
+	}
+
+	.navitem.active {
+		--bgc: #e9ecef;
+	}
+
+	.navitem :global(.fav::before) {
+		width: 0.65rem;
+		margin-right: 0.5rem;
+		height: 0.65rem;
 	}
 </style>

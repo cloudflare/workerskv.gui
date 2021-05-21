@@ -8,6 +8,7 @@
 	import { active } from '$lib/stores/connections';
 
 	import List from '@sveltejs/svelte-virtual-list';
+	import Nickname from '$lib/tags/Nickname.svelte';
 	import Layout from '$lib/tags/Layout.svelte';
 	import Value from '$lib/tags/Value.svelte';
 	import Date from '$lib/tags/Date.svelte';
@@ -159,7 +160,7 @@
 		{#if keylist.length > 0}
 			<List items={keylist} let:item>
 				<span
-					class="keyitem"
+					class="navitem keyitem"
 					class:selected={item === viewing}
 					on:click={onexpand}>{item}</span>
 			</List>
@@ -177,16 +178,21 @@
 	</svelte:fragment>
 
 	<div class="details" slot="content">
-		<header style="--c: {$active.color}">
+		<header>
 			<small>
 				Last Sync: <Date value={lastsync} />
 			</small>
 
 			<span>
 				{#if $active.nickname}
-					<b>{ $active.nickname }</b>
+					<Nickname
+						label={ $active.nickname }
+						color={ $active.color }
+					/>
 				{:else}
-					<b>{ $active.host }:{ $active.port }</b>
+					<Nickname
+						label="{ $active.host }:{ $active.port }"
+					/>
 				{/if}
 				<button on:click={disconnect}>Disconnect</button>
 			</span>
@@ -262,24 +268,12 @@
 	}
 
 	.keyitem {
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		transition: background 200ms linear;
 		font-family: menlo, inconsolata, monospace;
 		border-bottom: var(--border);
-		font-size: 0.85rem;
-		display: block;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.keyitem:hover {
-		background: #e9ecef;
 	}
 
 	.keyitem.selected {
-		background: #ffc078;
+		--bgc: #ffc078;
 	}
 
 	.keynav {
@@ -355,19 +349,8 @@
 		font-weight: 600;
 	}
 
-	.details b {
-		margin-right: 0.5rem;
-	}
-
-	.details b::before {
-		content: '';
-		position: relative;
-		display: inline-block;
-		margin-right: 0.25rem;
-		background: var(--c, transparent);
-		border-radius: 50%;
-		height: 0.5rem;
-		width: 0.5rem;
+	.details button {
+		margin-left: 0.5rem;
 	}
 
 	.fields {

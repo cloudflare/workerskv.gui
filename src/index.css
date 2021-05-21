@@ -66,3 +66,27 @@ header {
 	border-bottom: var(--border);
 	height: 3rem;
 }
+
+.navitem {
+	display: block;
+	cursor: pointer;
+	font-size: 0.85rem;
+	padding: 0.25rem 0.5rem;
+	transition: background 200ms linear;
+	background: var(--bgc, transparent);
+	border-bottom: var(--border);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.navitem:hover {
+	--bgc: #e9ecef;
+}
+
+.navitem.selected,
+.navitem.active {
+	--bgc: #ffc078;
+}
