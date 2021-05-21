@@ -41,7 +41,7 @@ pub fn keys(conn: &mut Connection) -> Vec<String> {
  * AKA: A `sync` was completed
  */
 pub fn lastsync(conn: &mut Connection) -> String {
-	redis::cmd("GET").arg(LASTSYNC).query(conn).expect("unable to retrieve lastsync value")
+	redis::cmd("GET").arg(LASTSYNC).query(conn).unwrap_or_default()
 }
 
 /**
