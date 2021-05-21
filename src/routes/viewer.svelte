@@ -5,6 +5,7 @@
 
 	import * as utils from '$lib/utils';
 	import * as KV from '$lib/utils/kvn';
+	import * as mime from '$lib/utils/mime';
 	import { active } from '$lib/stores/connections';
 
 	import List from '@sveltejs/svelte-virtual-list';
@@ -79,6 +80,15 @@
 		});
 	}
 
+	function isTag(tag: 'video' | 'img' | 'audio', src: string): Promise<boolean> {
+		return new Promise(res => {
+			let elem = document.createElement(tag);
+			elem.onerror = () => res(false);
+			elem.onload = () => res(true);
+			elem.src = src;
+		});
+	}
+
 	/**
 	 * get the value for a single key
 	 */
@@ -91,18 +101,23 @@
 		let seconds = utils.timestamp();
 		let { accountid, namespaceid, accesstoken } = $active;
 		let value = await KV.retrieve(accountid, namespaceid, accesstoken, name);
+
 		console.log({ value, seconds });
+
+		// TODO: real mimetype sniffing
+		let info = await mime.parse(value);
 
 		await dispatch('redis_value', {
 			key: name,
-			value: value,
+			value: info.value,
+			mimetype: info.mimetype,
 			timestamp: seconds,
-			mimetype: null, // TODO
 		});
+
 		// client-side updates
 		details.lastupdate = seconds;
-		details.mimetype = null;
-		details.value = value;
+		details.mimetype = info.mimetype;
+		details.value = info.value;
 		details = details;
 	}
 
@@ -244,7 +259,10 @@
 					<button class="sm" on:click={retrieve}>Refresh</button>
 				</div>
 				<span class="value key-value">
-					<Value value={details.value} />
+					<Value
+						value={details.value}
+						mimetype={details.mimetype}
+					/>
 				</span>
 			</div>
 

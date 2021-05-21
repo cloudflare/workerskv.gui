@@ -1,5 +1,6 @@
 import { getClient } from '@tauri-apps/api/http';
 import type { HttpOptions } from '@tauri-apps/api/http';
+import type { Category } from './mime';
 
 // sent to Redis
 export interface Key {
@@ -8,7 +9,7 @@ export interface Key {
 	expires?: string;
 	metadata?: string;
 	lastupdate?: string;
-	mimetype?: string;
+	mimetype?: Category;
 	value?: string;
 }
 
