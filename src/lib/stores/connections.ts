@@ -12,6 +12,12 @@ export interface Connection {
 	username: Nullable<string>;
 	/** redis password */
 	password: Nullable<string>;
+	/** kv namespaceid */
+	namespaceid: string;
+	/** cflare accountid */
+	accountid: string;
+	/** cflare accesstoken */
+	accesstoken: string;
 }
 
 export const active = writable<Partial<Connection>>({

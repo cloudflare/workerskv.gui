@@ -31,7 +31,6 @@
 	$: descending = sorting === 2;
 	$: ascending = sorting === 1;
 
-
 	async function disconnect() {
 		await dispatch('redis_disconnect');
 		goto('/');
@@ -85,7 +84,8 @@
 
 		let name = details.name;
 		let seconds = utils.timestamp();
-		let value = await KV.retrieve(ACCT, NSID, TOKEN, name);
+		let { accountid, namespaceid, accesstoken } = $active;
+		let value = await KV.retrieve(accountid, namespaceid, accesstoken, name);
 		console.log({ value, seconds });
 
 		await dispatch('redis_value', {
@@ -230,21 +230,13 @@
 							<small><Date value={details.lastupdate}/></small>
 						{/if}
 					</span>
-					<button>Refresh</button>
+					<button on:click={retrieve}>Refresh</button>
 				</div>
 				<span class="value key-value">
 					<Value value={details.value} />
 				</span>
 			</div>
 		</div>
-
-		<pre>
-			{ JSON.stringify(details, null, 2) }
-		</pre>
-
-		<button on:click={retrieve}>Retrieve Value</button>
-		<!-- {#if details.value == null}
-		{/if} -->
 	</div>
 </Layout>
 
@@ -263,14 +255,19 @@
 	}
 
 	:global(.viewer aside) header {
+		padding: 0.5rem;
 		background: #f1f3f5;
-		padding: 0.75rem 1rem;
 		display: block;
 	}
 
 	:global(.viewer aside) input {
-		font-size: 2rem;
+		height: 2rem;
 		width: 100%;
+	}
+
+	:global(.viewer aside) input:not(:placeholder-shown),
+	:global(.viewer aside) input:hover {
+		border-color: #ffd8a8;
 	}
 
 	:global(.viewer aside svelte-virtual-list-viewport) {
@@ -350,7 +347,7 @@
 	.empty-keys pre {
 		display: inline;
 		background: #dee2e6;
-		border-radius: 4px;
+		border-radius: var(--radius);
 		font-size: 75%;
 		padding: 0.5em;
 	}
@@ -414,7 +411,7 @@
 		display: block;
 		font-size: 0.85rem;
 		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
+		border-radius: var(--radius);
 		background: #dee2e6;
 		overflow-x: auto;
 	}

@@ -7,20 +7,21 @@
 	import { onMount, tick } from 'svelte';
 	import * as Connections from '$lib/stores/connections';
 	import { goto } from '$app/navigation';
+	import { dispatch } from '$lib/tauri';
 
 	import Layout from '$lib/tags/Layout.svelte';
 	import Colors from '$lib/tags/Colors.svelte';
-	import Input from '$lib/tags/Input.svelte';
-	import { dispatch } from '$lib/tauri';
 
 	import type { ValidationRules } from 'formee';
+	import type { Connection } from '$lib/stores/connections';
 
 	// initial value
 	let favorites = [];
 
 	let selected = -1;
-	let form: HTMLFormElement, errors={};
-	let values: Partial<Connections.Connection> = {};
+	let form: HTMLFormElement;
+	let values: Partial<Connection> = {};
+	let errors: Partial<Record<keyof Connection, string>> = {};
 
 	const rules: ValidationRules = {
 		'nickname': val => {
@@ -32,19 +33,35 @@
 			if (val == null) return 'Required';
 			return /^#([a-f0-9A-F]{3}){1,2}$/.test(val) || 'Must be valid HEX code';
 		},
-		'redis.host': val => {
+		'host': val => {
 			if (val == null) return 'Required';
 			return true; // TODO: IP address
 		},
-		'redis.port': val => {
+		'port': val => {
 			if (val == null) return 'Required';
 			return (+val > 1000) || 'Must be at least 1000';
 		},
-		'redis.username': val => {
+		'username': val => {
 			if (val == null) return true; // optional
 			return val.length > 2 || 'Must be at least 2 characters';
 		},
-		// TODO: others
+		'password': val => {
+			if (val == null) return true; // optional
+			return val.length > 1 || 'Must be at least 1 character';
+		},
+		// TODO: other redis stuff
+		'namespaceid': val => {
+			if (val == null) return 'Required';
+			return val.length > 16 || 'Invalid value'; // TODO
+		},
+		'accountid': val => {
+			if (val == null) return 'Required';
+			return val.length > 16 || 'Invalid value'; // TODO
+		},
+		'accesstoken': val => {
+			if (val == null) return 'Required';
+			return val.length > 16 || 'Invalid value'; // TODO
+		},
 	};
 
 	function isValid() {
@@ -52,39 +69,24 @@
 		return form.isValid;
 	}
 
-	$: console.log('errors', errors);
-
-	// function run(cmd: string, arg?: any): EventListener {
-	// 	return async function (ev) {
-	// 		console.log('inside', cmd, arg);
-	// 		let output = await dispatch(cmd, arg);
-	// 		console.log('RECEIVED', output);
-	// 	};
-	// }
-
 	function select(index: number) {
 		selected = index;
 		values = favorites[selected];
 	}
 
-	async function quickconnect(index: number) {
-		select(index);
-		await tick();
-		form.submit();
-	}
-
-	async function toConnect(ev: Event) {
+	async function toConnect() {
 		if (!isValid()) return;
+
 		let redis = {
 			host: values.host,
 			port: values.port,
 			// TODO: others
 		};
-		console.log('~> connect', redis);
-		let out = await dispatch('redis_connect', redis);
-		console.log('output', out);
 
-		Connections.select(values);
+		console.log('~> connect', redis);
+		await dispatch('redis_connect', redis);
+
+		Connections.select(values as Connection);
 		form.reset();
 
 		goto('/viewer');
@@ -120,10 +122,7 @@
 
 			<ul>
 				{#each favorites as fav,idx (idx)}
-					<li
-						on:click={() => select(idx)}
-						on:dblclick={() => quickconnect(idx)}
-					>
+					<li on:click={() => select(idx)}>
 						{ fav.nickname } ({fav.color})
 					</li>
 				{/each}
@@ -132,45 +131,87 @@
 	</svelte:fragment>
 
 	<form slot="content" bind:this={form} on:submit|preventDefault={toConnect}>
-		<Input
-			id="c-nickname" name="nickname"
-			label="Nickname" bind:value={values.nickname}
-		/>
+		<div class="input" class:invalid={!!errors.nickname}>
+			<label for="c-nickname">Nickname</label>
+			<input
+				id="c-nickname" name="nickname"
+				type="text" bind:value={values.nickname}
+			/>
+		</div>
 
-		<label for="c-color">Color</label>
-		<Colors
-			id="c-color" name="color"
-			bind:value={values.color}
-		/>
+		<div class="input colors" class:invalid={!!errors.color}>
+			<label for="c-color">Color</label>
+			<Colors
+				id="c-color" name="color"
+				bind:value={values.color}
+			/>
+		</div>
 
 		<fieldset>
 			<legend>Redis Connection</legend>
 
-			<Input
-				label="Host"
-				id="r-host" name="redis.host"
-				type="text" bind:value={values.host}
-				placeholder="localhost" required
-			/>
+			<div class="input" class:invalid={!!errors.host}>
+				<label for="r-host">Host</label>
+				<input
+					id="r-host" name="host"
+					type="text" bind:value={values.host}
+					placeholder="localhost" required
+				/>
+			</div>
 
-			<Input
-				label="Port"
-				id="r-port" name="redis.port"
-				type="number" bind:value={values.port}
-				placeholder="6379" required
-			/>
+			<div class="input" class:invalid={!!errors.port}>
+				<label for="r-port">Port</label>
+				<input
+					id="r-port" name="port"
+					type="number" bind:value={values.port}
+					placeholder="6379" required
+				/>
+			</div>
 
-			<Input
-				label="Username"
-				id="r-username" name="redis.username"
-				type="text" bind:value={values.username}
-			/>
+			<div class="input" class:invalid={!!errors.username}>
+				<label for="r-username">Username</label>
+				<input
+					id="r-username" name="username"
+					type="text" bind:value={values.username}
+				/>
+			</div>
 
-			<Input
-				label="Password"
-				id="r-password" name="redis.password"
-				type="password" bind:value={values.password}
-			/>
+			<div class="input" class:invalid={!!errors.password}>
+				<label for="r-password">Password</label>
+				<input
+					id="r-password" name="password"
+					type="password" bind:value={values.password}
+				/>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Cloudflare Details</legend>
+
+			<div class="input" class:invalid={!!errors.namespaceid}>
+				<label for="kv-nsid">Namespace ID</label>
+				<input
+					id="kv-nsid" name="namespaceid"
+					bind:value={values.namespaceid} required
+				/>
+			</div>
+
+			<div class="input" class:invalid={!!errors.accountid}>
+				<label for="kv-acct">Account ID</label>
+				<input
+					id="kv-acct" name="accountid"
+					bind:value={values.accountid} required
+				/>
+			</div>
+
+			<div class="input" class:invalid={!!errors.accesstoken}>
+				<label for="kv-token">Access Token</label>
+				<input
+					id="kv-token" name="accesstoken"
+					type="password" bind:value={values.accesstoken}
+					required
+				/>
+			</div>
 		</fieldset>
 
 		<span>
@@ -191,8 +232,42 @@
 	}
 
 	form {
-		background-color: #e9ecef;
-		width: clamp(360px, 50%, 600px);
+		--w: 440px;
+		min-width: var(--w);
 		padding: 1rem 2rem;
+		background-color: #e9ecef;
+		width: clamp(var(--w), 50%, 600px);
+		border-radius: var(--radius);
+		flex-direction: column;
+		border: var(--border);
+		display: flex;
+	}
+
+	fieldset {
+		padding: 0.5rem;
+		margin: 0.5rem 0;
+		border: 1px solid #dee2e6;
+		border-radius: var(--radius);
+	}
+
+	legend {
+		font-weight: 300;
+		padding: 0 0.5rem;
+	}
+
+	.input {
+		display: grid;
+		margin: 0.25rem 0;
+		grid-template-columns: 6rem 1fr;
+		align-items: center;
+	}
+
+	.input label {
+		font-weight: 600;
+		font-size: 0.7rem;
+	}
+
+	.input.invalid input {
+		border-color: #fa5252;
 	}
 </style>
