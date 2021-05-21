@@ -100,6 +100,7 @@
 		else favorites[selected] = values;
 
 		favorites = favorites;
+		Connections.update(favorites);
 	}
 
 	onMount(() => {
