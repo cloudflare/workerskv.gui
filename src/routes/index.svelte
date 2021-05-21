@@ -3,11 +3,11 @@
 </script>
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { validate } from 'formee';
-	import { onMount, tick } from 'svelte';
-	import * as Connections from '$lib/stores/connections';
-	import { goto } from '$app/navigation';
 	import { dispatch } from '$lib/tauri';
+	import { goto } from '$app/navigation';
+	import * as Connections from '$lib/stores/connections';
 
 	import Layout from '$lib/tags/Layout.svelte';
 	import Colors from '$lib/tags/Colors.svelte';
@@ -22,6 +22,8 @@
 	let form: HTMLFormElement;
 	let values: Partial<Connection> = {};
 	let errors: Partial<Record<keyof Connection, string>> = {};
+
+	$: isEditing = selected > -1;
 
 	const rules: ValidationRules = {
 		'nickname': val => {
@@ -71,7 +73,7 @@
 
 	function select(index: number) {
 		selected = index;
-		values = favorites[selected];
+		values = selected > -1 ? favorites[selected] : {};
 	}
 
 	async function toConnect() {
@@ -92,12 +94,12 @@
 		goto('/viewer');
 	}
 
-	async function toFavorite(ev: Event) {
+	async function toFavorite() {
 		if (!isValid()) return;
 
 		// editing favorite VS is new fav
-		if (selected === -1) favorites.push(values);
-		else favorites[selected] = values;
+		if (isEditing) favorites[selected] = values;
+		else favorites.push(values);
 
 		favorites = favorites;
 		Connections.update(favorites);
@@ -111,10 +113,8 @@
 
 <Layout class="connect">
 	<svelte:fragment slot="aside">
-		<header
-			class:active={selected === -1}
-			on:click={() => select(-1)}
-		>
+		<header class:active={!isEditing} on:click={() => select(-1)}>
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
 			Quick Connect
 		</header>
 
@@ -270,5 +270,39 @@
 
 	.input.invalid input {
 		border-color: #fa5252;
+	}
+
+	:global(.connect aside) {
+		display: flex;
+	}
+
+	header {
+		--c: #ffd43b;
+		padding: 1rem;
+		align-items: center;
+		justify-content: flex-end;
+		background: var(--bg, transparent);
+		transition: background 200ms linear;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	header svg {
+		width: 1.25rem;
+		height: 1.25rem;
+		margin-right: 0.375rem;
+		transition: fill 200ms linear;
+		fill: var(--c);
+	}
+
+	header:hover {
+		--bg: #e9ecef;
+		--c: #ffa94d;
+	}
+
+	header.active {
+		--bg: #e9ecef;
+		--c: #fd7e14;
 	}
 </style>

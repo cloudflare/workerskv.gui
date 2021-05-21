@@ -80,4 +80,3 @@ export async function retrieve(
 	let endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountid}/storage/kv/namespaces/${namespaceid}/values/${keyname}`;
 	return send<string>(endpoint, { headers, responseType: 3 }).then(r => r.data); // "number[]"
 }
-

@@ -28,6 +28,8 @@
 		width: clamp(220px, 30%, 360px);
 		border-right: var(--border);
 		background-color: #f8f9fa;
+		flex-direction: column;
+		display: flex;
 	}
 
 	aside.wider {

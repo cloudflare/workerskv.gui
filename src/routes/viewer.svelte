@@ -240,19 +240,6 @@
 </Layout>
 
 <style>
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		border-bottom: var(--border);
-		height: 3rem;
-	}
-
-	:global(.viewer aside) {
-		display: flex;
-		flex-direction: column;
-	}
-
 	:global(.viewer aside) header {
 		padding: 0.5rem;
 		background: #f1f3f5;

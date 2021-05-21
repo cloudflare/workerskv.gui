@@ -58,3 +58,11 @@ code {
 	font-family: menlo, inconsolata, monospace;
 	font-size: calc(1em - 3px);
 }
+
+header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: var(--border);
+	height: 3rem;
+}
