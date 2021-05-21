@@ -23,10 +23,17 @@ struct Context(
 #[command]
 fn redis_connect(label: String, host: String, port: u16, clients: State<Context>) {
 	let mut locker = clients.0.lock().expect("could not lock mutex");
-
 	let client = redis::connect(host, port, false);
 	locker.insert(label, client);
 	drop(locker);
+}
+
+#[command]
+fn redis_select(label: String, namespaceid: String, clients: State<Context>) {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
+	redis::select(&mut client, namespaceid);
+	drop(client); drop(locker);
 }
 
 #[command]
@@ -115,6 +122,7 @@ fn main() {
 		.invoke_handler(tauri::generate_handler![
 			redis_connect,
 			redis_disconnect,
+			redis_select,
 
 			redis_keylist,
 			redis_lastsync,

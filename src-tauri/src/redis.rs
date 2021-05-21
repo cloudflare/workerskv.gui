@@ -3,6 +3,7 @@ extern crate redis;
 use std::collections::HashMap;
 
 const KEYLIST: &str = "##__INTERNAL::keylist";
+const NAMESPACES: &str = "##__INTERNAL::namespaces";
 const LASTSYNC: &str = "##__INTERNAL::lastsync";
 
 pub type Connection = redis::Connection;
@@ -23,8 +24,28 @@ pub fn disconnect() {
 	println!("~> disconnecting");
 }
 
-pub fn run<T: redis::FromRedisValue, A: redis::ToRedisArgs>(conn: &mut Connection, name: &str, args: A) -> redis::RedisResult<T> {
-	redis::cmd(name).arg(args).query(conn)
+pub fn select(conn: &mut Connection, namespaceid: String) -> String {
+	let iter: redis::Iter<(String, String)> = redis::cmd("HSCAN").arg(&[&NAMESPACES, "0"]).clone().iter(conn).expect(
+		&format!("unable to lookup existing namespaces")
+	);
+
+	let hash: HashMap<String, String> = iter.collect();
+
+	if let Some(ident) = hash.get(&namespaceid) {
+		redis::cmd("SELECT").arg(ident).query(conn).expect(
+			&format!("unable to 'SELECT {}' database", &ident)
+		)
+	} else {
+		// redis databases are 0-based
+		let nextid = hash.len().to_string();
+		let _: () = redis::cmd("HSET").arg(&[NAMESPACES, &namespaceid, &nextid]).query(conn).expect(
+			"unable to update namespaces list"
+		);
+
+		redis::cmd("SELECT").arg(nextid).query(conn).expect(
+			&format!("unable to 'SELECT {}' database", hash.len().to_string())
+		)
+	}
 }
 
 /**

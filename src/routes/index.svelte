@@ -89,6 +89,10 @@
 		console.log('~> connect', redis);
 		await dispatch('redis_connect', redis);
 
+		await dispatch('redis_select', {
+			namespaceid: values.namespaceid,
+		});
+
 		Connections.select(values as Connection);
 		form.reset();
 
