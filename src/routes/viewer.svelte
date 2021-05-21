@@ -53,6 +53,8 @@
 		let pager = KV.list(accountid, namespaceid, accesstoken);
 		let seconds = utils.timestamp();
 
+		let keybatch: string[] = [];
+
 		for await (let payload of pager) {
 			let arr = await Promise.all(
 				payload.keys.map(info => {
@@ -65,9 +67,12 @@
 				})
 			);
 
-			keylist = keylist.concat(arr);
+			keybatch = keybatch.concat(arr);
 			if (payload.done) break;
 		}
+
+		// client update
+		keylist = keybatch;
 
 		await dispatch('redis_sync', {
 			timestamp: utils.timestamp()
