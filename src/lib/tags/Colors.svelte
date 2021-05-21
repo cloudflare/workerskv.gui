@@ -16,7 +16,11 @@
 
 	export let id = '';
 	export let name = '';
-	export let value = colors[0];
+	export let value = null;
+
+	$: if (!value) {
+		value = colors[0];
+	}
 
 	function onFocus(ev: FocusEvent) {
 		let target = ev.target as HTMLElement;
