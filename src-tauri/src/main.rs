@@ -10,105 +10,108 @@ use tauri::{command, State};
 mod redis;
 mod menu;
 
-type Client = Option<redis::Connection>;
+type Client = redis::Connection;
 
-struct Context {
-	client: Arc<Mutex<Client>>,
-}
+#[derive(Default)]
+struct Context(
+	Arc<Mutex<HashMap<String, Client>>>
+);
 
 /**
  * TODO: password, ssl, etc
  */
 #[command]
-fn redis_connect(host: String, port: u16, state: State<Context>) {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	*locker = Some(redis::connect(host, port, false));
+fn redis_connect(label: String, host: String, port: u16, clients: State<Context>) {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+
+	let client = redis::connect(host, port, false);
+	locker.insert(label, client);
 	drop(locker);
 }
 
 #[command]
-fn redis_disconnect(state: State<Context>) {
-	let mut locker = state.client.lock().expect("could not lock mutex");
+fn redis_disconnect(label: String, clients: State<Context>) {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	locker.remove(&label);
 	redis::disconnect();
-	*locker = None;
 	drop(locker);
 }
 
 #[command]
-fn redis_keylist(state: State<Context>) -> Vec<String> {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_keylist(label: String, clients: State<Context>) -> Vec<String> {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	let keys = redis::keys(&mut client);
 	drop(client); drop(locker);
 	return keys;
 }
 
 #[command]
-fn redis_lastsync(state: State<Context>) -> String {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_lastsync(label: String, clients: State<Context>) -> String {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	let value = redis::lastsync(&mut client);
 	drop(client); drop(locker);
 	return value;
 }
 
 #[command]
-fn redis_sync(timestamp: String, state: State<Context>) {
+fn redis_sync(label: String, timestamp: String, clients: State<Context>) {
 	println!("inside sync! {}", timestamp);
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	redis::timestamp(&mut client, &timestamp);
 	drop(client); drop(locker);
 }
 
 #[command]
-fn redis_set(name: String, syncd: String, expires: Option<String>, metadata: Option<String>, state: State<Context>) {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_set(label: String, name: String, syncd: String, expires: Option<String>, metadata: Option<String>, clients: State<Context>) {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	redis::set(&mut client, name, syncd, expires, metadata);
 	drop(client); drop(locker);
 }
 
 #[command]
-fn redis_filter(pattern: String, state: State<Context>) -> Vec<String> {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_filter(label: String, pattern: String, clients: State<Context>) -> Vec<String> {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	let keys = redis::filter(&mut client, pattern);
 	drop(client); drop(locker);
 	return keys;
 }
 
 #[command]
-fn redis_sort(descending: bool, state: State<Context>) -> Vec<String> {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_sort(label: String, descending: bool, clients: State<Context>) -> Vec<String> {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	let keys = redis::sort(&mut client, descending);
 	drop(client); drop(locker);
 	return keys;
 }
 
 #[command]
-fn redis_details(key: String, state: State<Context>) -> HashMap<String, String> {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_details(label: String, key: String, clients: State<Context>) -> HashMap<String, String> {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	let keys = redis::details(&mut client, key);
 	drop(client); drop(locker);
 	return keys;
 }
 
 #[command]
-fn redis_value(key: String, value: String, timestamp: String, mimetype: Option<String>, state: State<Context>) {
-	let mut locker = state.client.lock().expect("could not lock mutex");
-	let mut client = locker.as_mut().expect("missing redis client");
+fn redis_value(label: String, key: String, value: String, timestamp: String, mimetype: Option<String>, clients: State<Context>) {
+	let mut locker = clients.0.lock().expect("could not lock mutex");
+	let mut client = locker.get_mut(&label).expect("missing redis client");
 	redis::value(&mut client, key, value, timestamp, mimetype);
 	drop(client); drop(locker);
 }
 
 fn main() {
 	tauri::Builder::default()
-		.manage(Context {
-			client: Arc::new(Mutex::new(None)),
-		})
+		.manage(
+			Context::default()
+		)
 		.invoke_handler(tauri::generate_handler![
 			redis_connect,
 			redis_disconnect,
