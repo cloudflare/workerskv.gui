@@ -101,9 +101,18 @@
 		// editing favorite VS is new fav
 		if (isEditing) favorites[selected] = values as Connection;
 		else favorites.push(values as Connection);
-
-		favorites = favorites;
 		Connections.update(favorites);
+		favorites = favorites;
+	}
+
+	// saving changes to favorite
+	async function toUpdate() {
+		if (!isValid()) return;
+
+		// editing favorite VS is new fav
+		favorites[selected] = values as Connection;
+		Connections.update(favorites);
+		favorites = favorites;
 	}
 
 	onMount(() => {
@@ -224,13 +233,15 @@
 			</div>
 		</fieldset>
 
-		<span>
-			<button on:click|preventDefault={toFavorite}>
-				Add to Favorites
-			</button>
-			<button type="submit">Connect</button>
-		</span>
+		<footer>
+			{#if isEditing}
+				<button on:click|preventDefault={toUpdate}>Save Changes</button>
+			{:else}
+				<button on:click|preventDefault={toFavorite}>Add to Favorites</button>
+			{/if}
 
+			<button type="submit">Connect</button>
+		</footer>
 	</form>
 </Layout>
 
@@ -333,5 +344,11 @@
 		width: 0.65rem;
 		margin-right: 0.5rem;
 		height: 0.65rem;
+	}
+
+	footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 	}
 </style>
