@@ -7,8 +7,9 @@
 
 <style>
 	.empty {
-		-webkit-user-select: none;
+		user-select: none;
 		pointer-events: none;
+		-webkit-user-select: none;
 		font-style: italic;
 		opacity: 0.4;
 	}

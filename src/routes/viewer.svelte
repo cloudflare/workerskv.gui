@@ -28,6 +28,9 @@
 
 	$: isFiltering = pattern.length > 0;
 	$: nosorting = keylist.length === 0 || isFiltering;
+	$: descending = sorting === 2;
+	$: ascending = sorting === 1;
+
 
 	async function disconnect() {
 		await dispatch('redis_disconnect');
@@ -145,8 +148,12 @@
 			/>
 		</header>
 
-		<nav>
-			<span disabled={nosorting} on:click={onsort}>Key</span>
+		<nav class="keynav" class:descending class:ascending>
+			<span disabled={nosorting} on:click={onsort}>
+				Key
+				<svg class="i-asc" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zm0 4a1 1 0 000 2h5a1 1 0 000-2H3zm0 4a1 1 0 100 2h4a1 1 0 100-2H3zm10 5a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/></svg>
+				<svg class="i-desc" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zm0 4a1 1 0 000 2h7a1 1 0 100-2H3zm0 4a1 1 0 100 2h4a1 1 0 100-2H3zm12-3a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z"/></svg>
+			</span>
 			<button on:click={synchronize}>SYNC</button>
 		</nav>
 
@@ -271,12 +278,28 @@
 		flex: 1;
 	}
 
-	:global(.viewer aside .keyitem) {
+	.keyitem {
+		cursor: pointer;
+		padding: 0.25rem 0.5rem;
+		transition: background 200ms linear;
+		font-family: menlo, inconsolata, monospace;
 		border-bottom: var(--border);
+		font-size: 0.85rem;
 		display: block;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
-	nav {
+	.keyitem:hover {
+		background: #e9ecef;
+	}
+
+	.keyitem.selected {
+		background: #ffc078;
+	}
+
+	.keynav {
 		display: grid;
 		align-items: center;
 		grid-template-columns: 1fr 80px;
@@ -289,9 +312,30 @@
 		width: 100%;
 	}
 
-	:global(.viewer aside nav>span),
-	:global(.viewer aside .keyitem) {
-		padding: 0.25rem 0.5rem;
+	.keynav > span {
+		padding: 0.375rem 0.5rem;
+		-webkit-user-select: none;
+		user-select: none;
+		display: inline-flex;
+		align-items: center;
+		cursor: pointer;
+	}
+
+	.keynav svg {
+		color: #343a40;
+		position: absolute;
+		visibility: hidden;
+		height: 0.7rem;
+		width: 0.7rem;
+		left: 2rem;
+	}
+
+	.keynav.descending .i-desc {
+		visibility: visible;
+	}
+
+	.keynav.ascending .i-asc {
+		visibility: visible;
 	}
 
 	.empty-keys {
