@@ -1,8 +1,4 @@
 <script>
-	export let id = '';
-	export let name = '';
-	export let value = '';
-
 	let colors = [
 		'#fa5252', // red
 		'#e64980', // pink
@@ -17,6 +13,10 @@
 		'#fab005', // yellow
 		'#fd7e14', // orange
 	];
+
+	export let id = '';
+	export let name = '';
+	export let value = colors[0];
 </script>
 
 <input {id} {name} type="hidden" bind:value >
