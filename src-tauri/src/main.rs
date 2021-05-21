@@ -8,11 +8,12 @@ use std::collections::HashMap;
 use tauri::{command, State};
 
 mod redis;
+mod menu;
 
 type Client = Option<redis::Connection>;
 
 struct Context {
-  client: Arc<Mutex<Client>>,
+	client: Arc<Mutex<Client>>,
 }
 
 /**
@@ -123,6 +124,12 @@ fn main() {
 			redis_details,
 			redis_value,
 		])
+		.menu(
+			menu::mainmenu()
+		)
+		.on_menu_event(|event| {
+			println!("{:?}", event.menu_item_id());
+		})
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
 }
