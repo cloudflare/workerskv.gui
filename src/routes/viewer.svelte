@@ -7,6 +7,7 @@
 	import * as KV from '$lib/utils/kvn';
 	import { active } from '$lib/stores/connections';
 
+	import List from '@sveltejs/svelte-virtual-list';
 	import Layout from '$lib/tags/Layout.svelte';
 	import Value from '$lib/tags/Value.svelte';
 	import Date from '$lib/tags/Date.svelte';
@@ -150,11 +151,12 @@
 		</nav>
 
 		{#if keylist.length > 0}
-			<ul class="keylist">
-				{#each keylist as keyname (keyname)}
-				<li class:selected={keyname === viewing} on:click={onexpand}>{keyname}</li>
-				{/each}
-			</ul>
+			<List items={keylist} let:item>
+				<span
+					class="keyitem"
+					class:selected={item === viewing}
+					on:click={onexpand}>{item}</span>
+			</List>
 		{:else}
 			<div class="empty-keys">
 				{#if isFiltering}
@@ -264,13 +266,14 @@
 		width: 100%;
 	}
 
-	:global(.viewer aside ul) {
+	:global(.viewer aside svelte-virtual-list-viewport) {
 		overflow-y: auto;
 		flex: 1;
 	}
 
-	:global(.viewer aside li) {
+	:global(.viewer aside .keyitem) {
 		border-bottom: var(--border);
+		display: block;
 	}
 
 	nav {
@@ -287,7 +290,7 @@
 	}
 
 	:global(.viewer aside nav>span),
-	:global(.viewer aside li) {
+	:global(.viewer aside .keyitem) {
 		padding: 0.25rem 0.5rem;
 	}
 
