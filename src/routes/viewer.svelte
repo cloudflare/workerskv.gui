@@ -46,32 +46,31 @@
 	}
 
 	async function synchronize() {
-		if (await proceed()) {
-			// TODO: pull from $active
-			let pager = KV.list(ACCT, NSID, TOKEN);
+		if (!await proceed()) return;
 
-			let seconds = utils.timestamp();
+		let { accountid, namespaceid, accesstoken } = $active;
+		let pager = KV.list(accountid, namespaceid, accesstoken);
+		let seconds = utils.timestamp();
 
-			for await (let payload of pager) {
-				let arr = await Promise.all(
-					payload.keys.map(info => {
-						return dispatch('redis_set', {
-							name: info.name,
-							syncd: seconds,
-							expires: info.expiration ? String(info.expiration) : null,
-							metadata: info.metadata ? JSON.stringify(info.metadata) : null,
-						}).then(() => info.name);
-					})
-				);
+		for await (let payload of pager) {
+			let arr = await Promise.all(
+				payload.keys.map(info => {
+					return dispatch('redis_set', {
+						name: info.name,
+						syncd: seconds,
+						expires: info.expiration ? String(info.expiration) : null,
+						metadata: info.metadata ? JSON.stringify(info.metadata) : null,
+					}).then(() => info.name);
+				})
+			);
 
-				keylist = keylist.concat(arr);
-				if (payload.done) break;
-			}
-
-			await dispatch('redis_sync', {
-				timestamp: utils.timestamp()
-			});
+			keylist = keylist.concat(arr);
+			if (payload.done) break;
 		}
+
+		await dispatch('redis_sync', {
+			timestamp: utils.timestamp()
+		});
 	}
 
 	/**
