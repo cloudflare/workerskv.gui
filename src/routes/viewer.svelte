@@ -300,11 +300,12 @@
 
 	.keyitem {
 		font-family: menlo, inconsolata, monospace;
+		border-left: 4px solid transparent;
 		border-bottom: var(--border);
 	}
 
 	.keyitem.selected {
-		--bgc: #ffc078;
+		border-left-color: #fd7e14;
 	}
 
 	.keynav {
