@@ -115,11 +115,9 @@ pub fn set(conn: &mut Connection, name: String, syncd: String, expires: Option<S
 }
 
 pub fn filter(conn: &mut Connection, pattern: String) -> Vec<String>  {
-	let iter: redis::Iter<String> = redis::cmd("SSCAN").arg(&[KEYLIST, "0", "MATCH", &pattern, "COUNT", "1000"]).clone().iter(conn).expect(
-		&format!("unable to run 'SSCAN MATCH {}' operation", &pattern)
-	);
-
-	iter.collect()
+	redis::cmd("KEYS").arg(&pattern).query(conn).expect(
+		&format!("unable to run 'KEYS {}' operation", &pattern)
+	)
 }
 
 pub fn sort(conn: &mut Connection, to_desc: bool) -> Vec<String>  {
