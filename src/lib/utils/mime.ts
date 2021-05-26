@@ -43,7 +43,7 @@ export async function parse(value: string): Promise<{ value: string, mimetype: C
 		URL.revokeObjectURL(objurl);
 	}
 
-	let text: string = String.fromCharCode.apply(null, points);
+	let text = new TextDecoder('utf-8').decode(new Uint8Array(points));
 
 	try {
 		JSON.parse(text);
