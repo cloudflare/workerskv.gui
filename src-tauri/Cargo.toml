@@ -2,12 +2,12 @@
 name = "kv_gui"
 version = "0.0.0"
 description = "Dashboard GUI client for Workers KV Namespaces"
+repository = "https://github.com/cloudflare/workerskv.gui"
 authors = ["Luke Edwards"]
-license = ""
-repository = ""
 default-run = "kv_gui"
 edition = "2018"
 build = "src/build.rs"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
