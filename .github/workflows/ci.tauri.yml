@@ -1,0 +1,58 @@
+name: CI / Tauri
+
+on:
+  push:
+    tags-ignore:
+      - '**'
+    paths:
+      - 'src-tauri/**'
+  pull_request:
+    tags-ignore:
+      - '**'
+    paths:
+      - 'src-tauri/**'
+
+jobs:
+  compiles:
+    name: Tauri (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 14
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: (setup) cargo cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: (ubuntu) install webkit2gtk
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtk-3-dev libgtksourceview-3.0-dev webkit2gtk-4.0 libappindicator3-dev
+
+    - name: (setup) pnpm
+      run: npm install -g pnpm
+
+    - name: (client) install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Tauri Build
+      uses: tauri-apps/tauri-action@v0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
