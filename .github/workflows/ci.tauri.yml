@@ -1,17 +1,20 @@
 name: CI / Tauri
 
-on: push
-# on:
-#   push:
-#     tags-ignore:
-#       - '**'
-#     paths:
-#       - 'src-tauri/**'
-#   pull_request:
-#     tags-ignore:
-#       - '**'
-#     paths:
-#       - 'src-tauri/**'
+on:
+  push:
+    tags-ignore:
+      - '**'
+    branches:
+      - '**'
+    paths:
+      - 'src-tauri/**'
+  pull_request:
+    tags-ignore:
+      - '**'
+    branches:
+      - 'master'
+    paths:
+      - 'src-tauri/**'
 
 jobs:
   compiles:

@@ -1,24 +1,26 @@
 name: CI / Client
 
-on: push
-
-# on:
-#   push:
-#     tags-ignore:
-#       - '**'
-#     paths:
-#       - '*.json'
-#       - '@types/**'
-#       - 'svelte.config.js'
-#       - 'src/**'
-#   pull_request:
-#     tags-ignore:
-#       - '**'
-#     paths:
-#       - '*.json'
-#       - '@types/**'
-#       - 'svelte.config.js'
-#       - 'src/**'
+on:
+  push:
+    tags-ignore:
+      - '**'
+    branches:
+      - '**'
+    paths:
+      - '*.json'
+      - '@types/**'
+      - 'svelte.config.js'
+      - 'src/**'
+  pull_request:
+    tags-ignore:
+      - '**'
+    branches:
+      - 'master'
+    paths:
+      - '*.json'
+      - '@types/**'
+      - 'svelte.config.js'
+      - 'src/**'
 
 jobs:
   test:
