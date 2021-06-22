@@ -52,11 +52,13 @@ pub fn mainmenu() -> Vec<Menu<String>> {
 		]
 	};
 
-	// Attention:
-	// Windows only support custom menu for now.
-	// If we add any `MenuItem::*` they'll not render
-	// We need to use custom menu with `Menu::new()` and catch
-	// the events in the EventLoop.
+	// ATTENTION
+	// Windows only supports custom menus, for the time being.
+	// ---
+	// Any `MenuItem::*` will not render;
+	// @see https://github.com/cloudflare/workerskv.gui/issues/7
+	// We could use custom menus via `Menu::new()` & EventLoop
+	// ...or wait for the next `tauri.Menu` version w/ fixes.
 	#[cfg(target_os = "windows")]
 	let menu = {
 		vec![
