@@ -1,6 +1,6 @@
 [package]
 name = "kv_gui"
-version = "0.0.0"
+version = "0.0.1"
 description = "Dashboard GUI client for Workers KV Namespaces"
 repository = "https://github.com/cloudflare/workerskv.gui"
 authors = ["Luke Edwards"]
