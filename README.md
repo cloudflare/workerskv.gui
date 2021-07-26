@@ -11,14 +11,22 @@ Built with:
 
 ## Install
 
-> **Note:** Pre-built images are not available at this time.
+> **Note:** Pre-built applications are available on the [Releases](/releases) page!
 
 You must have [Redis installed locally](https://redis.io/download) to use `localhost` servers.
 
+***Local Development***
+
+Please follow the [Tauri Getting Started Guide](https://tauri.studio/en/docs/getting-started/intro#steps) to setup your system with the Rust toolchain.
+
+Once complete, this application is built like a typical Node.js application – however, [`pnpm`](https://pnpm.io/) is used for package management.
+
 ```sh
-$ npm install
-$ npm run build
+$ pnpm install
+$ pnpm run build
 ```
+
+> **Note:** You may use `yarn` or `npm`, but only a `pnpm` lockfile is included.
 
 ## Screenshots
 
