@@ -1,105 +1,51 @@
-use tauri::{CustomMenuItem, Menu, MenuItem};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 
-pub fn mainmenu() -> Vec<Menu<String>> {
+pub fn mainmenu() -> Menu {
 	// NOTE: custom keybinds not yet supported
-	let new_window = MenuItem::Custom(
-		CustomMenuItem::new("new:window".into(), "New Window")
-	);
+	let new_window = CustomMenuItem::new("new:window", "New Window");
+	let new_issue = CustomMenuItem::new("new:issue", "Report an Issue");
 
-	let new_issue = MenuItem::Custom(
-		CustomMenuItem::new("new:issue".into(), "Report an Issue")
-	);
+	let menu_app = Menu::new()
+		.add_native_item(MenuItem::About(
+			"Workers KV".to_string()
+		))
+		.add_native_item(MenuItem::Services)
+		.add_native_item(MenuItem::Separator)
+		.add_native_item(MenuItem::Hide)
+		.add_native_item(MenuItem::HideOthers)
+		.add_native_item(MenuItem::ShowAll)
+		.add_native_item(MenuItem::Separator)
+		.add_native_item(MenuItem::Quit);
 
-	#[cfg(any(target_os = "linux", target_os = "macos"))]
-	let menu = {
-		vec![
-			Menu::new("Workers KV", vec![
-				MenuItem::About(
-					"Workers KV".to_string()
-				),
-				MenuItem::Services,
-				MenuItem::Separator,
-				MenuItem::Hide,
-				MenuItem::HideOthers,
-				MenuItem::ShowAll,
-				MenuItem::Separator,
-				MenuItem::Quit,
-			]),
-			Menu::new("File", vec![
-				new_window,
-				MenuItem::Separator,
-				MenuItem::CloseWindow,
-			]),
-			Menu::new("Edit", vec![
-				MenuItem::Undo,
-				MenuItem::Redo,
-				MenuItem::Separator,
-				MenuItem::Cut,
-				MenuItem::Copy,
-				MenuItem::Paste,
-				MenuItem::SelectAll,
-			]),
-			Menu::new("View", vec![
-				MenuItem::EnterFullScreen
-			]),
-			Menu::new("Window", vec![
-				MenuItem::Minimize,
-				MenuItem::Zoom,
-			]),
-			Menu::new("Help", vec![
-				new_issue
-			]),
-		]
-	};
+	let menu_file = Menu::new()
+		.add_item(new_window)
+		.add_native_item(MenuItem::Separator)
+		.add_native_item(MenuItem::CloseWindow);
 
-	// ATTENTION
-	// Windows only supports custom menus, for the time being.
-	// ---
-	// Any `MenuItem::*` will not render;
-	// @see https://github.com/cloudflare/workerskv.gui/issues/7
-	// We could use custom menus via `Menu::new()` & EventLoop
-	// ...or wait for the next `tauri.Menu` version w/ fixes.
-	#[cfg(target_os = "windows")]
-	let menu = {
-		vec![
-			// Menu::new("Workers KV", vec![
-			// 	MenuItem::About(
-			// 		"Workers KV".to_string()
-			// 	),
-			// 	MenuItem::Services,
-			// 	MenuItem::Separator,
-			// 	MenuItem::Hide,
-			// 	MenuItem::HideOthers,
-			// 	MenuItem::ShowAll,
-			// 	MenuItem::Separator,
-			// 	MenuItem::Quit,
-			// ]),
-			Menu::new("File", vec![
-				new_window,
-				// MenuItem::Separator,
-				// MenuItem::CloseWindow,
-			]),
-			// Menu::new("Edit", vec![
-			// 	MenuItem::Undo,
-			// 	MenuItem::Redo,
-			// 	MenuItem::Separator,
-			// 	MenuItem::Cut,
-			// 	MenuItem::Copy,
-			// 	MenuItem::Paste,
-			// 	MenuItem::SelectAll,
-			// ]),
-			// Menu::new("View", vec![
-			// 	MenuItem::EnterFullScreen
-			// ]),
-			// Menu::new("Window", vec![
-			// 	MenuItem::Minimize,
-			// 	MenuItem::Zoom,
-			// ]),
-			Menu::new("Help", vec![
-				new_issue
-			]),
-		]
-	};
+	let menu_edit = Menu::new()
+		.add_native_item(MenuItem::Undo)
+		.add_native_item(MenuItem::Redo)
+		.add_native_item(MenuItem::Separator)
+		.add_native_item(MenuItem::Cut)
+		.add_native_item(MenuItem::Copy)
+		.add_native_item(MenuItem::Paste)
+		.add_native_item(MenuItem::SelectAll);
 
-	menu
+	let menu_view = Menu::new()
+		.add_native_item(MenuItem::EnterFullScreen);
+
+	let menu_window = Menu::new()
+		.add_native_item(MenuItem::Minimize)
+		.add_native_item(MenuItem::Zoom);
+
+	let menu_help = Menu::new()
+		.add_item(new_issue);
+
+	Menu::new()
+		.add_submenu(Submenu::new("Workers KV", menu_app))
+		.add_submenu(Submenu::new("File", menu_file))
+		.add_submenu(Submenu::new("Edit", menu_edit))
+		.add_submenu(Submenu::new("View", menu_view))
+		.add_submenu(Submenu::new("Window", menu_window))
+		.add_submenu(Submenu::new("Help", menu_help))
 }
