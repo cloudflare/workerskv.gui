@@ -237,7 +237,9 @@
 			<div class="cell w50">
 				<span class="label">Expiration</span>
 				<span class="value">
-					<Value value={details.expires} />
+					<Value
+						value={details.expires && utils.date(details.expires)}
+					/>
 				</span>
 			</div>
 
