@@ -11,7 +11,7 @@ Built with:
 
 ## Install
 
-> **Note:** Pre-built applications are available on the [Releases](/releases) page!
+> **Note:** Pre-built applications are available on the [Releases](https://github.com/cloudflare/workerskv.gui/releases) page!
 
 You must have [Redis installed locally](https://redis.io/download) to use `localhost` servers.
 
