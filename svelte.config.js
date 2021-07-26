@@ -6,28 +6,13 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
+		ssr: false,
 		adapter: adapter({
 			fallback: 'index.html'
 		}),
 		files: {
 			template: 'src/index.html'
 		},
-		vite: {
-			ssr: {
-				noExternal: [
-					'@tauri-apps/api',
-					'@tauri-apps/api/process',
-					'@tauri-apps/api/window',
-				]
-			},
-			optimizeDeps: {
-				include: [
-					'@tauri-apps/api',
-					'@tauri-apps/api/process',
-					'@tauri-apps/api/window',
-				]
-			}
-		}
 	},
 };
 
