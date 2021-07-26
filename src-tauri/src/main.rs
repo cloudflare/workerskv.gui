@@ -21,9 +21,9 @@ struct Context(
  * TODO: password, ssl, etc
  */
 #[command]
-fn redis_connect(label: String, host: String, port: u16, clients: State<Context>) {
+fn redis_connect(label: String, host: String, port: u16, password: Option<String>, username: Option<String>, clients: State<Context>) {
 	let mut locker = clients.0.lock().expect("could not lock mutex");
-	let client = redis::connect(host, port, false);
+	let client = redis::connect(host, port, false, password, username);
 	locker.insert(label, client);
 	drop(locker);
 }

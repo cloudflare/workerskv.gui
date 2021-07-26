@@ -8,12 +8,29 @@ const LASTSYNC: &str = "##__INTERNAL::lastsync";
 
 pub type Connection = redis::Connection;
 
-// TODO: user, password, ssl, ssh, etc
-pub fn connect(host: String, port: u16, tls: bool) -> redis::Connection {
+// TODO: ssl, ssh, etc
+pub fn connect(host: String, port: u16, tls: bool, password: Option<String>, user: Option<String>) -> redis::Connection {
 	let scheme = if tls { "rediss" } else { "redis" };
 
+	let mut prefix = "".to_owned();
+
+	if let Some(user) = &user {
+		prefix.push_str(&user);
+	}
+
+	if let Some(password) = &password {
+		if prefix.len() > 0 {
+			prefix.push_str(":");
+		}
+		prefix.push_str(&password);
+	}
+
+	if prefix.len() > 0 {
+		prefix.push_str("@");
+	}
+
 	// rediss?://[<username>][:<passwd>@]<hostname>[:port][/<db>]
-	let addr = format!("{}://{}:{}", scheme, host, port);
+	let addr = format!("{}://{}{}:{}", scheme, prefix, host, port);
 	println!("~> connecting to {}", addr);
 
 	let client = redis::Client::open(addr).expect("invalid connection string");

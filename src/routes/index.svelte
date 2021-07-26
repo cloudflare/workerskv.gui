@@ -81,9 +81,11 @@
 		if (!isValid()) return;
 
 		let redis = {
+			// TODO: others
 			host: values.host,
 			port: values.port,
-			// TODO: others
+			password: values.password || null,
+			username: values.username || null,
 		};
 
 		console.log('~> connect', redis);
