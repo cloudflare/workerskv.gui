@@ -131,10 +131,13 @@ pub fn set(conn: &mut Connection, name: String, syncd: String, expires: Option<S
 	)
 }
 
+/**
+ * Filter an iterator over the set's keys.
+ */
 pub fn filter(conn: &mut Connection, pattern: String) -> Vec<String>  {
 	let iter: redis::Iter<String> = redis::cmd("SSCAN").arg(KEYLIST).cursor_arg(0).arg("MATCH").arg(&pattern)
 		.clone().iter(conn).expect(
-			&format!("unable to run 'KEYS {}' operation", &pattern)
+			&format!("unable to run 'SSCAN x MATCH {}' operation", &pattern)
 		);
 
 	iter.collect()
