@@ -6,7 +6,6 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		ssr: false,
 		adapter: adapter({
 			fallback: 'index.html'
 		}),
