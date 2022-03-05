@@ -10,7 +10,8 @@ const config = {
 			fallback: 'index.html'
 		}),
 		files: {
-			template: 'src/index.html'
+			template: 'src/index.html',
+			hooks: 'src/hooks.ts'
 		},
 	},
 };
