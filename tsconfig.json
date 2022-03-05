@@ -1,4 +1,5 @@
 {
+  "extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
     "module": "es2020",
 		"target": "esnext",
@@ -12,9 +13,11 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"allowJs": false,
+    "checkJs": false,
 		"baseUrl": ".",
 		"paths": {
-			"$lib/*": ["src/lib/*"]
+      "$lib":["src/lib"],
+      "$lib/*":["src/lib/*"]
 		}
 	},
 	"include": [

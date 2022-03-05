@@ -6,12 +6,12 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		ssr: false,
 		adapter: adapter({
 			fallback: 'index.html'
 		}),
 		files: {
-			template: 'src/index.html'
+			template: 'src/index.html',
+			hooks: 'src/hooks.ts'
 		},
 	},
 };

@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -15,14 +15,14 @@
     "formee": "1.0.0"
   },
   "devDependencies": {
-    "@sveltejs/adapter-static": "1.0.0-next.9",
-    "@sveltejs/kit": "1.0.0-next.109",
-    "@tauri-apps/api": "1.0.0-beta.5",
-    "@tauri-apps/cli": "1.0.0-beta.6",
-    "premove": "3.0.1",
-    "svelte": "3.38.2",
-    "svelte-preprocess": "4.7.3",
-    "tslib": "2.2.0",
-    "typescript": "4.2.4"
+    "@sveltejs/adapter-static": "1.0.0-next.29",
+    "@sveltejs/kit": "1.0.0-next.294",
+    "@tauri-apps/api": "1.0.0-rc.1",
+    "@tauri-apps/cli": "1.0.0-rc.5",
+    "premove": "4.0.0",
+    "svelte": "3.46.4",
+    "svelte-preprocess": "4.10.4",
+    "tslib": "2.3.1",
+    "typescript": "4.6.2"
   }
 }
