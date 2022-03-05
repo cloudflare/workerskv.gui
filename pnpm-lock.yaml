@@ -7,11 +7,11 @@ specifiers:
   '@tauri-apps/api': 1.0.0-rc.1
   '@tauri-apps/cli': 1.0.0-rc.5
   formee: 1.0.0
-  premove: 3.0.1
+  premove: 4.0.0
   svelte: 3.46.4
   svelte-preprocess: 4.10.4
-  tslib: 2.2.0
-  typescript: 4.2.4
+  tslib: 2.3.1
+  typescript: 4.6.2
 
 dependencies:
   '@sveltejs/svelte-virtual-list': 3.0.1
@@ -22,11 +22,11 @@ devDependencies:
   '@sveltejs/kit': 1.0.0-next.294_svelte@3.46.4
   '@tauri-apps/api': 1.0.0-rc.1
   '@tauri-apps/cli': 1.0.0-rc.5
-  premove: 3.0.1
+  premove: 4.0.0
   svelte: 3.46.4
-  svelte-preprocess: 4.10.4_svelte@3.46.4+typescript@4.2.4
-  tslib: 2.2.0
-  typescript: 4.2.4
+  svelte-preprocess: 4.10.4_svelte@3.46.4+typescript@4.6.2
+  tslib: 2.3.1
+  typescript: 4.6.2
 
 packages:
 
@@ -598,8 +598,8 @@ packages:
       source-map-js: 1.0.2
     dev: true
 
-  /premove/3.0.1:
-    resolution: {integrity: sha512-lH6+7lVMTu7Fl3NdfptcY7E5ElRVhAOpW0mfJq8qPex84KEaT7TOXYvGLW2PFp+wpWrvNMAn3RNYyy+QKx2kiA==}
+  /premove/4.0.0:
+    resolution: {integrity: sha512-zim/Hr4+FVdCIM7zL9b9Z0Wfd5Ya3mnKtiuDv7L5lzYzanSq6cOcVJ7EFcgK4I0pt28l8H0jX/x3nyog380XgQ==}
     engines: {node: '>=6'}
     hasBin: true
     dev: true
@@ -684,7 +684,7 @@ packages:
       svelte: 3.46.4
     dev: true
 
-  /svelte-preprocess/4.10.4_svelte@3.46.4+typescript@4.2.4:
+  /svelte-preprocess/4.10.4_svelte@3.46.4+typescript@4.6.2:
     resolution: {integrity: sha512-fuwol0N4UoHsNQolLFbMqWivqcJ9N0vfWO9IuPAiX/5okfoGXURyJ6nECbuEIv0nU3M8Xe2I1ONNje2buk7l6A==}
     engines: {node: '>= 9.11.2'}
     requiresBuild: true
@@ -732,7 +732,7 @@ packages:
       sorcery: 0.10.0
       strip-indent: 3.0.0
       svelte: 3.46.4
-      typescript: 4.2.4
+      typescript: 4.6.2
     dev: true
 
   /svelte/3.46.4:
@@ -747,8 +747,8 @@ packages:
       globrex: 0.1.2
     dev: true
 
-  /tslib/2.2.0:
-    resolution: {integrity: sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==}
+  /tslib/2.3.1:
+    resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
     dev: true
 
   /type-fest/2.11.2:
@@ -756,8 +756,8 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  /typescript/4.2.4:
-    resolution: {integrity: sha512-V+evlYHZnQkaz8TRBuxTA92yZBPotr5H+WhQ7bD3hZUndx5tGOa1fuCgeSjxAzM1RiN5IzvadIXTVefuuwZCRg==}
+  /typescript/4.6.2:
+    resolution: {integrity: sha512-HM/hFigTBHZhLXshn9sN37H085+hQGeJHJ/X7LpBWLID/fbc2acUMfU+lGD98X81sKP+pFa9f0DZmCwB9GnbAg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
