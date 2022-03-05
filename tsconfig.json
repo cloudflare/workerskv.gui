@@ -13,6 +13,7 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"allowJs": false,
+    "checkJs": false,
 		"baseUrl": ".",
 		"paths": {
       "$lib":["src/lib"],
